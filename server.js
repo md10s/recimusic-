@@ -62,7 +62,7 @@ app.post('/api/auth/register', async (req, res) => {
 
   if (!profile.ok) return res.status(400).json({ error: 'El nombre de usuario ya existe.' });
 
-  res.json({ user: auth.data.user, session: auth.data.session, username });
+  res.json({ user: auth.data.user, session: { access_token: auth.data.session?.access_token }, username });
 });
 
 // POST /api/auth/login  { email, password }
@@ -111,30 +111,40 @@ app.post('/api/reviews', async (req, res) => {
   const user = await userRes.json();
   if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
 
-  // Upsert concert usando service key (sin RLS)
-  const concertRes = await fetch(`${SUPABASE_URL}/rest/v1/concerts`, {
-    method: 'POST',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'resolution=ignore-duplicates,return=representation',
-    },
-    body: JSON.stringify({ setlistfm_id, artist_name, venue_name, city, country,
-                           event_date, tour_name, song_count, setlist_data }),
-  });
+  // Buscar o crear el concert
+  let concert;
+  const searchRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/concerts?setlistfm_id=eq.${encodeURIComponent(setlistfm_id)}&select=id`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+  );
+  const searchData = await searchRes.json();
 
-  const concertText = await concertRes.text();
-  let concertData;
-  try { concertData = JSON.parse(concertText); }
-  catch { return res.status(500).json({ error: 'Error al guardar el show.', detail: concertText }); }
-
-  if (!concertRes.ok) {
-    console.error('[Concert error]', concertData);
-    return res.status(500).json({ error: 'Error al guardar el show.', detail: concertData });
+  if (searchData && searchData.length > 0) {
+    concert = searchData[0];
+  } else {
+    const concertRes = await fetch(`${SUPABASE_URL}/rest/v1/concerts`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+      },
+      body: JSON.stringify({ setlistfm_id, artist_name, venue_name, city, country,
+                             event_date, tour_name, song_count, setlist_data }),
+    });
+    const concertText = await concertRes.text();
+    let concertData;
+    try { concertData = JSON.parse(concertText); }
+    catch { return res.status(500).json({ error: 'Error al guardar el show.', detail: concertText }); }
+    if (!concertRes.ok) {
+      console.error('[Concert error]', concertData);
+      return res.status(500).json({ error: 'Error al guardar el show.', detail: concertData });
+    }
+    concert = Array.isArray(concertData) ? concertData[0] : concertData;
   }
 
-  const concert = Array.isArray(concertData) ? concertData[0] : concertData;
+  if (!concert?.id) return res.status(500).json({ error: 'No se pudo obtener el ID del show.' });
 
   // Upsert review con token del usuario
   const reviewRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
