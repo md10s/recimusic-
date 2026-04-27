@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SETLOG — Explorar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111113;
+    --surface2: #1a1a1e;
+    --surface3: #222228;
+    --border: rgba(255,255,255,0.07);
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #f0f0f2;
+    --text-muted: #6b6b78;
+    --text-dim: #3a3a44;
+    --star-active: #e8ff47;
+    --star-inactive: #2a2a30;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 60px;
+    background: rgba(10,10,11,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--accent);
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .nav-links li { cursor: pointer; transition: color .2s; }
+  .nav-links li:hover { color: var(--text); }
+  .nav-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #000;
+    cursor: pointer;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    height: 520px;
+    overflow: hidden;
+    margin-top: 60px;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 100% at 60% 40%, rgba(232,255,71,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 70% at 20% 60%, rgba(255,107,53,0.06) 0%, transparent 50%),
+      #0a0a0b;
+  }
+  .hero-img-container {
+    position: absolute;
+    right: -20px; top: -30px;
+    width: 55%;
+    height: 120%;
+    overflow: hidden;
+  }
+  .hero-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: fadeIn 1s ease 0.3s forwards;
+  }
+  .hero-img-fake {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg,
+      rgba(232,255,71,0.15) 0%,
+      rgba(255,107,53,0.1) 30%,
+      rgba(100,60,180,0.15) 60%,
+      rgba(20,20,30,0.9) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .artist-silhouette {
+    width: 280px; height: 380px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(232,255,71,0.12) 100%);
+    border-radius: 50% 50% 0 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .artist-silhouette::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 60%; height: 50%;
+    background: rgba(0,0,0,0.4);
+    border-radius: 50%;
+    filter: blur(30px);
+  }
+  .hero-vignette {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to right,
+      var(--bg) 0%,
+      rgba(10,10,11,0.85) 35%,
+      rgba(10,10,11,0.3) 60%,
+      transparent 80%
+    );
+  }
+  .hero-vignette-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 200px;
+    background: linear-gradient(to top, var(--bg), transparent);
+  }
+
+  .hero-content {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 55%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 48px 48px;
+    animation: slideUp 0.8s ease 0.2s both;
+  }
+
+  .breadcrumb {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .breadcrumb span { color: var(--accent); }
+
+  .concert-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 7vw, 88px);
+    line-height: 0.95;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .concert-title em {
+    display: block;
+    font-style: normal;
+    color: var(--accent);
+    font-size: 0.65em;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .meta-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+  .meta-pill svg { width: 12px; height: 12px; opacity: 0.7; }
+  .meta-pill.highlight { border-color: rgba(232,255,71,0.3); color: var(--accent); }
+
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+  }
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 24px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary:hover { background: #d4eb3a; transform: translateY(-1px); }
+  .btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 20px;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-secondary:hover { background: var(--surface3); border-color: rgba(255,255,255,0.15); }
+
+  .stats-band {
+    position: absolute;
+    bottom: 0; right: 0;
+    display: flex;
+    gap: 0;
+    overflow: hidden;
+    animation: fadeIn 1s ease 0.6s both;
+  }
+  .stat-block {
+    padding: 14px 28px;
+    background: rgba(10,10,11,0.8);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  .left-col { padding-right: 48px; }
+  .right-col { position: relative; }
+
+  /* ── SETLIST ── */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .setlist-container { margin-bottom: 48px; }
+
+  .setlist-set {
+    margin-bottom: 24px;
+  }
+  .set-name {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 0 0 10px 52px;
+  }
+
+  .song-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .15s;
+    position: relative;
+  }
+  .song-item:hover { background: var(--surface2); }
+  .song-item:hover .song-play { opacity: 1; }
+  .song-item:hover .song-num { opacity: 0; }
+
+  .song-num {
+    width: 36px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: opacity .15s;
+    flex-shrink: 0;
+  }
+  .song-play {
+    position: absolute;
+    left: 16px;
+    width: 36px;
+    opacity: 0;
+    transition: opacity .15s;
+    color: var(--accent);
+    font-size: 14px;
+  }
+  .song-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 400;
+  }
+  .song-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge-cover { background: rgba(255,107,53,0.15); color: var(--accent2); }
+  .badge-debut { background: rgba(232,255,71,0.12); color: var(--accent); }
+  .badge-encore { background: rgba(255,255,255,0.07); color: var(--text-muted); }
+  .song-duration {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 12px;
+  }
+
+  /* ── SEPARADOR ENCORE ── */
+  .encore-divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 8px 52px 8px;
+    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .encore-divider::before, .encore-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── REVIEWS ── */
+  .reviews-section { margin-bottom: 48px; }
+
+  .write-review-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .rating-input {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .star-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--star-inactive);
+    transition: all .15s;
+    padding: 2px;
+  }
+  .star-btn:hover, .star-btn.active { color: var(--star-active); transform: scale(1.1); }
+
+  .review-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 12px 16px;
+    resize: none;
+    min-height: 80px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .review-input:focus { border-color: rgba(232,255,71,0.4); }
+  .review-input::placeholder { color: var(--text-dim); }
+
+  .review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+  }
+  .date-tag {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .review-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    transition: border-color .2s;
+  }
+  .review-card:hover { border-color: rgba(255,255,255,0.12); }
+
+  .review-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .reviewer-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #000;
+  }
+  .reviewer-info { flex: 1; }
+  .reviewer-name { font-size: 14px; font-weight: 500; }
+  .review-date { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .review-stars {
+    display: flex;
+    gap: 2px;
+    font-size: 13px;
+  }
+  .star-filled { color: var(--star-active); }
+  .star-empty { color: var(--star-inactive); }
+  .review-text { font-size: 14px; line-height: 1.65; color: #c8c8d0; }
+  .review-likes {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    width: fit-content;
+    transition: color .2s;
+  }
+  .review-likes:hover { color: var(--accent2); }
+
+  /* ── SIDEBAR ── */
+  .sidebar-sticky {
+    position: sticky;
+    top: 80px;
+  }
+
+  .sidebar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+
+  .friends-heading {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .friends-heading a { font-size: 11px; color: var(--text-muted); text-decoration: none; }
+  .friends-heading a:hover { color: var(--accent); }
+
+  .friend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .friend-row:last-child { border-bottom: none; }
+  .friend-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #000;
+    flex-shrink: 0;
+  }
+  .friend-name { font-size: 13px; flex: 1; }
+  .friend-stars {
+    display: flex;
+    gap: 2px;
+    font-size: 10px;
+  }
+
+  .venue-info { margin-bottom: 0; }
+  .venue-info p { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+  .venue-name { font-size: 15px; color: var(--text); font-weight: 500; margin-bottom: 4px; }
+
+  .related-shows { }
+  .related-show {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .related-show:last-child { border-bottom: none; }
+  .related-show:hover .related-title { color: var(--accent); }
+  .related-thumb {
+    width: 40px; height: 40px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .related-info { flex: 1; }
+  .related-title { font-size: 13px; font-weight: 500; transition: color .2s; }
+  .related-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .related-rating { font-size: 12px; color: var(--accent); font-weight: 700; }
+
+  /* ── SEARCH SCREEN ── */
+  .search-screen {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: var(--bg);
+    overflow-y: auto;
+    padding-top: 60px;
+  }
+  .search-screen.active { display: block; }
+
+  .search-hero {
+    padding: 48px 48px 32px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .search-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .search-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 32px;
+  }
+  .search-title span { color: var(--accent); }
+
+  .search-input-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 18px;
+    pointer-events: none;
+  }
+  .search-field {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    padding: 18px 56px 18px 52px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-field:focus {
+    border-color: rgba(232,255,71,0.4);
+    box-shadow: 0 0 0 3px rgba(232,255,71,0.06);
+  }
+  .search-field::placeholder { color: var(--text-dim); }
+  .search-clear {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface3);
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all .15s;
+  }
+  .search-clear:hover { background: var(--border); color: var(--text); }
+  .search-clear.visible { display: flex; }
+
+  .search-filters {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .filter-chip {
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .filter-chip:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
+  .filter-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(232,255,71,0.07); }
+
+  /* Search results area */
+  .search-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .results-count {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .results-count strong { color: var(--text); }
+  .results-sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .sort-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* Concert result card */
+  .concert-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .concert-result-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all .2s;
+    animation: slideUp .3s ease both;
+  }
+  .concert-result-card:hover {
+    border-color: rgba(255,255,255,0.14);
+    background: var(--surface2);
+    transform: translateY(-1px);
+  }
+  .concert-result-card:hover .card-go { opacity: 1; transform: translateX(0); }
+
+  .card-thumb {
+    width: 52px; height: 52px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: #000;
+    background: linear-gradient(135deg, var(--accent), #b5cc1a);
+  }
+
+  .card-main { flex: 1; min-width: 0; }
+  .card-artist {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .card-rating {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .card-rating-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: right;
+  }
+  .card-logs {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .card-go {
+    font-size: 18px;
+    color: var(--text-muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all .2s;
+  }
+
+  /* Artist suggestion row */
+  .artist-suggestions {
+    margin-bottom: 32px;
+  }
+  .artist-pill-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .artist-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 8px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all .2s;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .artist-pill:hover { border-color: rgba(232,255,71,0.3); color: var(--accent); }
+  .artist-pill-avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #000;
+  }
+
+  /* Empty / loading states */
+  .search-empty {
+    text-align: center;
+    padding: 64px 32px;
+    display: none;
+  }
+  .search-empty.visible { display: block; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+  .empty-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; color: var(--text-muted); }
+
+  .search-loading {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .search-loading.visible { display: flex; }
+  .skeleton {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    height: 88px;
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%);
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(100%); }
+  }
+
+  /* Popular section (before search) */
+  .search-initial { }
+  .popular-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .popular-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .popular-card:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-1px); }
+  .popular-card-icon {
+    width: 44px; height: 44px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    color: #000;
+  }
+  .popular-card-info { flex: 1; }
+  .popular-card-artist { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 2px; }
+  .popular-card-show { font-size: 14px; font-weight: 500; }
+  .popular-card-meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: slideUp 0.5s ease both;
+  }
+
+  /* ── INTERACTIVE STARS ── */
+  .stars-display {
+    display: flex;
+    gap: 2px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">SETLOG</div>
+  <ul class="nav-links">
+    <li onclick="showSearch()" id="nav-explorar" style="color:var(--accent)">Explorar</li>
+    <li onclick="requireAuth(showColeccion)">Mi Colección</li>
+    <li>Amigos</li>
+    <li>Estadísticas</li>
+  </ul>
+  <div id="navAuth"></div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-img-container">
+    <div class="hero-img-fake">
+      <div class="artist-silhouette"></div>
+    </div>
+  </div>
+  <div class="hero-vignette"></div>
+  <div class="hero-vignette-bottom"></div>
+
+  <div class="hero-content">
+    <div class="breadcrumb">
+      <span>Taylor Swift</span> / Eras Tour / Shows
+    </div>
+    <h1 class="concert-title">
+      THE ERAS TOUR
+      <em>Buenos Aires · Noche 2</em>
+    </h1>
+    <div class="meta-row">
+      <div class="meta-pill highlight">
+        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
+        18 Nov 2023
+      </div>
+      <div class="meta-pill">
+        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/><path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+        Estadio Monumental, BsAs
+      </div>
+      <div class="meta-pill">
+        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+        3.984 asistentes loggearon
+      </div>
+    </div>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openLogModal()">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10h14V4h-3.5zM2 5h12v8H2V5z"/></svg>
+        Loggear este show
+      </button>
+      <button class="btn-secondary">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
+        Guardar
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-band">
+    <div class="stat-block">
+      <div class="stat-val">44</div>
+      <div class="stat-label">Canciones</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-val">3h 42m</div>
+      <div class="stat-label">Duración</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-val">4.9</div>
+      <div class="stat-label">Rating</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="left-col">
+
+    <!-- SETLIST -->
+    <div class="setlist-container animate-in">
+      <div class="section-label">Setlist oficial · Setlist.fm</div>
+
+      <div class="setlist-set">
+        <div class="set-name">Acto 1 · The Lover Era</div>
+        <div class="song-item">
+          <div class="song-num">01</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">Miss Americana & the Heartbreak Prince</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:54</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">02</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">Cruel Summer</div>
+          <div class="song-badges"><span class="badge badge-debut">DEBUT TOUR</span></div>
+          <div class="song-duration">2:58</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">03</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">The Man</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:10</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">04</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">You Need to Calm Down</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">2:51</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">05</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">Lover</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:41</div>
+        </div>
+      </div>
+
+      <div class="setlist-set">
+        <div class="set-name">Acto 2 · The Fearless Era</div>
+        <div class="song-item">
+          <div class="song-num">06</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">Fearless</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">4:01</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">07</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">You Belong With Me (Taylor's Version)</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:51</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">08</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">Love Story (Taylor's Version)</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:56</div>
+        </div>
+      </div>
+
+      <div class="setlist-set">
+        <div class="set-name">Acto 3 · The Red Era</div>
+        <div class="song-item">
+          <div class="song-num">09</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">22</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:52</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">10</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">We Are Never Ever Getting Back Together</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:13</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">11</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">I Knew You Were Trouble</div>
+          <div class="song-badges"></div>
+          <div class="song-duration">3:39</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">12</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">All Too Well (10 Minute Version)</div>
+          <div class="song-badges"><span class="badge badge-cover">10 MIN</span></div>
+          <div class="song-duration">10:13</div>
+        </div>
+      </div>
+
+      <div class="encore-divider">Encore</div>
+
+      <div class="setlist-set">
+        <div class="song-item">
+          <div class="song-num">43</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">Karma</div>
+          <div class="song-badges"><span class="badge badge-encore">ENCORE</span></div>
+          <div class="song-duration">3:24</div>
+        </div>
+        <div class="song-item">
+          <div class="song-num">44</div>
+          <div class="song-play">▶</div>
+          <div class="song-name">Anti-Hero</div>
+          <div class="song-badges"><span class="badge badge-encore">ENCORE</span></div>
+          <div class="song-duration">3:20</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="reviews-section animate-in">
+      <div class="section-label">Reseñas · 847 en total</div>
+
+      <!-- Write review -->
+      <div class="write-review-card">
+        <div style="font-size:13px; font-weight:500; margin-bottom:12px;">Tu reseña</div>
+        <div class="rating-input" id="ratingInput">
+          <button class="star-btn" onclick="setRating(1)">★</button>
+          <button class="star-btn" onclick="setRating(2)">★</button>
+          <button class="star-btn" onclick="setRating(3)">★</button>
+          <button class="star-btn" onclick="setRating(4)">★</button>
+          <button class="star-btn" onclick="setRating(5)">★</button>
+        </div>
+        <textarea class="review-input" placeholder="¿Qué recordás de este show? Momentos únicos, el setlist, la energía del estadio…"></textarea>
+        <div class="review-footer">
+          <div class="date-tag">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
+            18 Nov 2023
+          </div>
+          <button class="btn-primary" style="padding: 9px 18px; font-size:13px;">Publicar reseña</button>
+        </div>
+      </div>
+
+      <!-- Review cards -->
+      <div class="review-card">
+        <div class="review-header">
+          <div class="reviewer-avatar" style="background: linear-gradient(135deg, #e8ff47, #b5cc1a);">LG</div>
+          <div class="reviewer-info">
+            <div class="reviewer-name">lucía_goes</div>
+            <div class="review-date">19 nov 2023 · 8 shows loggeados</div>
+          </div>
+          <div class="review-stars">
+            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
+          </div>
+        </div>
+        <div class="review-text">Cuando arrancó con Cruel Summer pensé que me desmayaba. El Monumental repleto cantando cada palabra de All Too Well fue la experiencia colectiva más intensa de mi vida. No hay show que la iguale — y tengo 23 loggeados.</div>
+        <div class="review-likes">
+          <svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
+          342 útiles
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-header">
+          <div class="reviewer-avatar" style="background: linear-gradient(135deg, #ff6b35, #e8273d);">MV</div>
+          <div class="reviewer-info">
+            <div class="reviewer-name">mateo.vidal</div>
+            <div class="review-date">20 nov 2023 · 15 shows loggeados</div>
+          </div>
+          <div class="review-stars">
+            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-empty">★</span>
+          </div>
+        </div>
+        <div class="review-text">Producción impecable. El cambio de sets entre eras es una locura logística. Le saqué una estrella porque el sonido en el sector campo tuvo problemas en la primera hora, pero para el All Too Well ya estaba todo solucionado.</div>
+        <div class="review-likes">
+          <svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
+          187 útiles
+        </div>
+      </div>
+
+      <div class="review-card">
+        <div class="review-header">
+          <div class="reviewer-avatar" style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">SR</div>
+          <div class="reviewer-info">
+            <div class="reviewer-name">sof.ruiz__</div>
+            <div class="review-date">18 nov 2023 · 3 shows loggeados</div>
+          </div>
+          <div class="review-stars">
+            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
+          </div>
+        </div>
+        <div class="review-text">Primera vez en un recital de estadio. Sí o sí iba a ser abrumador, pero la forma en que Taylor maneja la energía del público — los 80.000 juntos cantando, los mares de pulseras — fue algo que no voy a olvidar nunca.</div>
+        <div class="review-likes">
+          <svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
+          95 útiles
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="right-col">
+    <div class="sidebar-sticky">
+
+      <!-- Friends -->
+      <div class="sidebar-card">
+        <div class="friends-heading">
+          Amigos que fueron
+          <a href="#">Ver todos</a>
+        </div>
+        <div class="friend-row">
+          <div class="friend-avatar" style="background: linear-gradient(135deg, #e8ff47, #b5cc1a);">AG</div>
+          <div class="friend-name">ana.garc</div>
+          <div class="friend-stars">
+            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
+          </div>
+        </div>
+        <div class="friend-row">
+          <div class="friend-avatar" style="background: linear-gradient(135deg, #60a5fa, #3b82f6);">JM</div>
+          <div class="friend-name">jm.otalvaro</div>
+          <div class="friend-stars">
+            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-empty">★</span>
+          </div>
+        </div>
+        <div class="friend-row">
+          <div class="friend-avatar" style="background: linear-gradient(135deg, #f472b6, #ec4899);">PL</div>
+          <div class="friend-name">paula.l</div>
+          <div class="friend-stars">
+            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Venue -->
+      <div class="sidebar-card venue-info">
+        <div class="section-label" style="margin-bottom:14px;">Venue</div>
+        <div class="venue-name">Estadio Monumental</div>
+        <p>Av. Figueroa Alcorta 7597<br>Buenos Aires, Argentina<br>Cap. 84.000 personas</p>
+        <div style="margin-top:14px; height:100px; background:var(--surface2); border-radius:8px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-dim); font-size:12px; letter-spacing:1px; text-transform:uppercase;">Mapa del venue</div>
+      </div>
+
+      <!-- Related -->
+      <div class="sidebar-card">
+        <div class="section-label" style="margin-bottom:14px;">Otras noches · Eras Tour BsAs</div>
+        <div class="related-show">
+          <div class="related-thumb" style="background: linear-gradient(135deg,#e8ff47,#b5cc1a); border-radius:6px;"></div>
+          <div class="related-info">
+            <div class="related-title">Noche 1 · 17 Nov 2023</div>
+            <div class="related-sub">Estadio Monumental</div>
+          </div>
+          <div class="related-rating">4.8 ★</div>
+        </div>
+        <div class="related-show">
+          <div class="related-thumb" style="background: linear-gradient(135deg,#ff6b35,#e8273d); border-radius:6px;"></div>
+          <div class="related-info">
+            <div class="related-title">Noche 3 · 19 Nov 2023</div>
+            <div class="related-sub">Estadio Monumental</div>
+          </div>
+          <div class="related-rating">5.0 ★</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH SCREEN -->
+<div id="searchScreen" class="search-screen active">
+
+  <div class="search-hero">
+    <!-- API KEY BANNER -->
+    <div id="apiBanner" style="
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 28px;
+    "></div>
+
+    <div class="search-eyebrow">Buscá cualquier show</div>
+    <h1 class="search-title">Explorá <span>Recitales</span></h1>
+
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        class="search-field"
+        id="searchField"
+        type="text"
+        placeholder="Artista, banda, tour… ej: Radiohead, Soda Stereo, Blur"
+        autocomplete="off"
+        oninput="handleSearch(this.value)"
+      />
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+
+    <div class="search-filters">
+      <div class="filter-chip active" onclick="toggleFilter(this)">Todos los géneros</div>
+      <div class="filter-chip" onclick="toggleFilter(this)">Rock</div>
+      <div class="filter-chip" onclick="toggleFilter(this)">Pop</div>
+      <div class="filter-chip" onclick="toggleFilter(this)">Electronic</div>
+      <div class="filter-chip" onclick="toggleFilter(this)">Hip-Hop</div>
+      <div class="filter-chip" onclick="toggleFilter(this)">Argentina 🇦🇷</div>
+      <div class="filter-chip" onclick="toggleFilter(this)">2024</div>
+      <div class="filter-chip" onclick="toggleFilter(this)">2023</div>
+    </div>
+  </div>
+
+  <div class="search-body">
+
+    <!-- INITIAL STATE (before searching) -->
+    <div class="search-initial" id="searchInitial">
+      <div class="section-label" style="margin-bottom:16px;">Tendencias esta semana</div>
+      <div class="artist-suggestions" >
+        <div class="artist-pill-row">
+          <div class="artist-pill" onclick="searchFor('Radiohead')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);">RH</div>
+            Radiohead
+          </div>
+          <div class="artist-pill" onclick="searchFor('Soda Stereo')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#f472b6,#9333ea);">SS</div>
+            Soda Stereo
+          </div>
+          <div class="artist-pill" onclick="searchFor('Blur')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#34d399,#059669);">BL</div>
+            Blur
+          </div>
+          <div class="artist-pill" onclick="searchFor('Charly García')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#fbbf24,#d97706);">CG</div>
+            Charly García
+          </div>
+          <div class="artist-pill" onclick="searchFor('The Strokes')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#f87171,#dc2626);">TS</div>
+            The Strokes
+          </div>
+          <div class="artist-pill" onclick="searchFor('Daft Punk')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#e8ff47,#b5cc1a);">DP</div>
+            Daft Punk
+          </div>
+          <div class="artist-pill" onclick="searchFor('Gustavo Cerati')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#c084fc,#7c3aed);">GC</div>
+            Gustavo Cerati
+          </div>
+          <div class="artist-pill" onclick="searchFor('Arctic Monkeys')">
+            <div class="artist-pill-avatar" style="background:linear-gradient(135deg,#94a3b8,#475569);">AM</div>
+            Arctic Monkeys
+          </div>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-bottom:16px;">Shows populares ahora</div>
+      <div class="popular-grid">
+        <div class="popular-card" onclick="showDetail(null)">
+          <div class="popular-card-icon" style="background:linear-gradient(135deg,#e8ff47,#b5cc1a);">TS</div>
+          <div class="popular-card-info">
+            <div class="popular-card-artist">Taylor Swift</div>
+            <div class="popular-card-show">The Eras Tour · BsAs N2</div>
+            <div class="popular-card-meta">18 Nov 2023 · 3.984 logs</div>
+          </div>
+        </div>
+        <div class="popular-card" onclick="showDetail(null)">
+          <div class="popular-card-icon" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);">RH</div>
+          <div class="popular-card-info">
+            <div class="popular-card-artist">Radiohead</div>
+            <div class="popular-card-show">In Rainbows Tour · Glastonbury</div>
+            <div class="popular-card-meta">27 Jun 2008 · 1.201 logs</div>
+          </div>
+        </div>
+        <div class="popular-card" onclick="showDetail(null)">
+          <div class="popular-card-icon" style="background:linear-gradient(135deg,#f472b6,#9333ea);">SS</div>
+          <div class="popular-card-info">
+            <div class="popular-card-artist">Soda Stereo</div>
+            <div class="popular-card-show">Me Verás Volver · River Plate</div>
+            <div class="popular-card-meta">19 Oct 2007 · 892 logs</div>
+          </div>
+        </div>
+        <div class="popular-card" onclick="showDetail(null)">
+          <div class="popular-card-icon" style="background:linear-gradient(135deg,#34d399,#059669);">AM</div>
+          <div class="popular-card-info">
+            <div class="popular-card-artist">Arctic Monkeys</div>
+            <div class="popular-card-show">The Car Tour · Lollapalooza ARG</div>
+            <div class="popular-card-meta">18 Mar 2023 · 654 logs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div class="search-loading" id="searchLoading">
+      <div class="skeleton"></div>
+      <div class="skeleton" style="animation-delay:.1s"></div>
+      <div class="skeleton" style="animation-delay:.2s"></div>
+      <div class="skeleton" style="animation-delay:.3s"></div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="searchResults" style="display:none;">
+      <div class="results-header">
+        <div class="results-count" id="resultsCount"></div>
+        <div class="results-sort">
+          Ordenar:
+          <select class="sort-select">
+            <option>Más relevante</option>
+            <option>Más reciente</option>
+            <option>Mejor rating</option>
+            <option>Más loggeados</option>
+          </select>
+        </div>
+      </div>
+      <div class="concert-grid" id="concertGrid"></div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="search-empty" id="searchEmpty">
+      <div class="empty-icon">🎸</div>
+      <div class="empty-title">Sin resultados para "<span id="emptyQuery"></span>"</div>
+      <div class="empty-sub">Probá con el nombre del artista en inglés o verificá la ortografía.<br>Si el show existió, podés crearlo manualmente.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="authModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(10px); z-index:300; align-items:center; justify-content:center;">
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:36px; width:420px; max-width:90vw;">
+    <div style="display:flex; gap:0; margin-bottom:28px; background:var(--surface2); border-radius:8px; padding:4px;">
+      <button id="tabLogin" onclick="switchTab('login')" style="flex:1; padding:8px; border:none; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer; background:var(--accent); color:#000; transition:all .2s;">Iniciar sesión</button>
+      <button id="tabRegister" onclick="switchTab('register')" style="flex:1; padding:8px; border:none; border-radius:6px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500; cursor:pointer; background:transparent; color:var(--text-muted); transition:all .2s;">Registrarse</button>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:2px; margin-bottom:4px;" id="authTitle">Bienvenido de nuevo</div>
+    <div style="font-size:13px; color:var(--text-muted); margin-bottom:24px;" id="authSubtitle">Iniciá sesión para loggear shows</div>
+    <div id="usernameField" style="display:none; margin-bottom:16px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Nombre de usuario</div>
+      <input id="authUsername" type="text" placeholder="ej: rockero_arg" style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; padding:12px 16px; outline:none;" />
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Email</div>
+      <input id="authEmail" type="email" placeholder="tu@email.com" style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; padding:12px 16px; outline:none;" />
+    </div>
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">Contraseña</div>
+      <input id="authPassword" type="password" placeholder="mínimo 6 caracteres" style="width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:14px; padding:12px 16px; outline:none;" onkeydown="if(event.key==='Enter') submitAuth()" />
+    </div>
+    <div id="authError" style="display:none; background:rgba(255,107,53,0.1); border:1px solid rgba(255,107,53,0.3); border-radius:8px; padding:10px 14px; font-size:13px; color:var(--accent2); margin-bottom:16px;"></div>
+    <button onclick="submitAuth()" id="authBtn" style="width:100%; background:var(--accent); border:none; border-radius:8px; color:#000; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; padding:14px; cursor:pointer;">Iniciar sesión</button>
+    <button onclick="closeAuthModal()" style="width:100%; margin-top:10px; background:none; border:none; color:var(--text-muted); font-family:'DM Sans',sans-serif; font-size:13px; cursor:pointer; padding:8px;">Cancelar</button>
+  </div>
+</div>
+
+<!-- COLECCIÓN SCREEN -->
+<div id="coleccionScreen" style="display:none; position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto; padding-top:60px;">
+  <div style="max-width:860px; margin:0 auto; padding:48px 32px;">
+    <div style="font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px;">Mi perfil</div>
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:2px; margin-bottom:4px;" id="colUsername">—</div>
+    <div style="font-size:13px; color:var(--text-muted); margin-bottom:40px;" id="colStats">0 shows loggeados</div>
+    <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:20px; display:flex; align-items:center; gap:12px;">Mis shows <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
+    <div id="colGrid" style="display:flex; flex-direction:column; gap:10px;">
+      <div style="text-align:center; padding:48px; color:var(--text-muted); font-size:14px;">Cargando tus shows…</div>
+    </div>
+  </div>
+</div>
+
+<!-- LOG MODAL -->
+<div id="logModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:200; align-items:center; justify-content:center;">
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; width:480px; max-width:90vw; animation: slideUp .3s ease both;">
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:28px; letter-spacing:2px; margin-bottom:4px;">Loggear Show</div>
+    <div id="logModalSub" style="font-size:13px; color:var(--text-muted); margin-bottom:24px;">—</div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Tu puntaje</div>
+      <div style="display:flex; gap:8px;" id="modalStars">
+        <button class="star-btn" style="font-size:32px;" onclick="setModalRating(1)">★</button>
+        <button class="star-btn" style="font-size:32px;" onclick="setModalRating(2)">★</button>
+        <button class="star-btn" style="font-size:32px;" onclick="setModalRating(3)">★</button>
+        <button class="star-btn" style="font-size:32px;" onclick="setModalRating(4)">★</button>
+        <button class="star-btn" style="font-size:32px;" onclick="setModalRating(5)">★</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div style="font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">¿Cuándo fuiste?</div>
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:14px; color:var(--text-muted);">18 de noviembre de 2023</div>
+    </div>
+
+    <div style="margin-bottom:24px;">
+      <div style="font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Reseña (opcional)</div>
+      <textarea class="review-input" style="min-height:100px;" placeholder="¿Qué fue lo más memorable?"></textarea>
+    </div>
+
+    <div style="display:flex; gap:10px;">
+      <button class="btn-primary" style="flex:1;" onclick="saveLog()">Guardar en mi colección</button>
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let session = JSON.parse(localStorage.getItem("setlog_session") || "null");
+  let currentSetlist = null;
+  let authMode = "login";
+  let modalRating = 0;
+  let pendingLog = false;
+
+  function renderNav() {
+    const el = document.getElementById("navAuth");
+    if (session) {
+      el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;"><span style="font-size:13px;color:var(--text-muted);">Hola, <strong style="color:var(--text);">${session.username}</strong></span><div class="nav-avatar" style="cursor:pointer;" onclick="requireAuth(showColeccion)">${session.username.slice(0,2).toUpperCase()}</div><button onclick="logout()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);font-family:DM Sans,sans-serif;font-size:12px;padding:5px 12px;cursor:pointer;">Salir</button></div>`;
+    } else {
+      el.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><button onclick="openAuthModal('login')" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:DM Sans,sans-serif;font-size:13px;padding:7px 16px;cursor:pointer;">Iniciar sesion</button><button onclick="openAuthModal('register')" style="background:var(--accent);border:none;border-radius:6px;color:#000;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;padding:7px 16px;cursor:pointer;">Registrarse</button></div>`;
+    }
+  }
+
+  function openAuthModal(mode) { switchTab(mode); document.getElementById("authModal").style.display="flex"; setTimeout(()=>document.getElementById("authEmail").focus(),100); }
+  function closeAuthModal() { document.getElementById("authModal").style.display="none"; document.getElementById("authError").style.display="none"; }
+  function switchTab(mode) {
+    authMode=mode; const isLogin=mode==="login";
+    document.getElementById("tabLogin").style.background=isLogin?"var(--accent)":"transparent";
+    document.getElementById("tabLogin").style.color=isLogin?"#000":"var(--text-muted)";
+    document.getElementById("tabRegister").style.background=!isLogin?"var(--accent)":"transparent";
+    document.getElementById("tabRegister").style.color=!isLogin?"#000":"var(--text-muted)";
+    document.getElementById("usernameField").style.display=isLogin?"none":"block";
+    document.getElementById("authTitle").textContent=isLogin?"Bienvenido de nuevo":"Crea tu cuenta";
+    document.getElementById("authSubtitle").textContent=isLogin?"Inicia sesion para loggear shows":"Gratis, para siempre";
+    document.getElementById("authBtn").textContent=isLogin?"Iniciar sesion":"Crear cuenta";
+    document.getElementById("authError").style.display="none";
+  }
+
+  async function submitAuth() {
+    const email=document.getElementById("authEmail").value.trim();
+    const password=document.getElementById("authPassword").value;
+    const username=document.getElementById("authUsername").value.trim();
+    const btn=document.getElementById("authBtn");
+    if(!email||!password) return showAuthError("Completa todos los campos.");
+    if(authMode==="register"&&!username) return showAuthError("Elegi un nombre de usuario.");
+    btn.textContent="Cargando..."; btn.disabled=true;
+    try {
+      const endpoint=authMode==="login"?"/api/auth/login":"/api/auth/register";
+      const body=authMode==="login"?{email,password}:{email,password,username};
+      const res=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||"Error desconocido");
+      session={token:data.session?.access_token,username:data.username,user:data.user};
+      localStorage.setItem("setlog_session",JSON.stringify(session));
+      renderNav(); closeAuthModal();
+      if(pendingLog){pendingLog=false;openLogModal();}
+    } catch(err){ showAuthError(err.message); }
+    finally{ btn.textContent=authMode==="login"?"Iniciar sesion":"Crear cuenta"; btn.disabled=false; }
+  }
+
+  function showAuthError(msg){const el=document.getElementById("authError");el.textContent=msg;el.style.display="block";}
+  async function logout(){
+    if(session?.token) await fetch("/api/auth/logout",{method:"POST",headers:{"Authorization":"Bearer "+session.token}});
+    session=null; localStorage.removeItem("setlog_session"); renderNav(); showSearch();
+  }
+  function requireAuth(cb){if(session)cb();else openAuthModal("login");}
+
+  async function showColeccion(){
+    document.getElementById("searchScreen").classList.remove("active");
+    document.querySelector(".hero").style.display="none";
+    document.querySelector(".main").style.display="none";
+    document.getElementById("coleccionScreen").style.display="block";
+    document.getElementById("colUsername").textContent=session.username;
+    const res=await fetch("/api/reviews/me",{headers:{"Authorization":"Bearer "+session.token}});
+    const reviews=await res.json();
+    document.getElementById("colStats").textContent=reviews.length+" show"+(reviews.length!==1?"s":"")+" loggeado"+(reviews.length!==1?"s":"");
+    const grid=document.getElementById("colGrid");
+    if(!reviews.length){grid.innerHTML="<div style='text-align:center;padding:48px;color:var(--text-muted);font-size:14px;'>Todavia no loggeaste ningun show.<br><br><button onclick=showSearch() class=btn-primary style=margin-top:16px>Explorar shows</button></div>";return;}
+    grid.innerHTML=reviews.map(r=>{
+      const c=r.concerts; const color=colorFor(c.artist_name);
+      const stars="★".repeat(r.rating||0)+"☆".repeat(5-(r.rating||0));
+      return "<div class=concert-result-card><div class=card-thumb style='background:linear-gradient(135deg,"+color+");'>" +initials(c.artist_name)+"</div><div class=card-main><div class=card-artist>"+c.artist_name+"</div><div class=card-title>"+c.venue_name+(c.tour_name?" · "+c.tour_name:"")+"</div><div class=card-meta><div class=card-meta-item>📍 "+( c.city||"—")+"</div><div class=card-meta-item>📅 "+(c.event_date||"—")+"</div><div class=card-meta-item>🎵 "+(c.song_count||"—")+" canciones</div></div></div><div class=card-right><div style='color:var(--star-active);font-size:16px;'>"+stars+"</div></div></div>";
+    }).join("");
+  }
+
+  function showSearch(){
+    document.getElementById("searchScreen").classList.add("active");
+    document.querySelector(".hero").style.display="none";
+    document.querySelector(".main").style.display="none";
+    document.getElementById("coleccionScreen").style.display="none";
+    document.getElementById("nav-explorar").style.color="var(--accent)";
+  }
+
+  function showDetail(setlist){
+    document.getElementById("searchScreen").classList.remove("active");
+    document.getElementById("coleccionScreen").style.display="none";
+    document.getElementById("nav-explorar").style.color="";
+    if(!setlist){document.querySelector(".hero").style.display="";document.querySelector(".main").style.display="";return;}
+    currentSetlist=setlist;
+    const artist=setlist.artist?.name||"—";
+    const venue=setlist.venue?.name||"—";
+    const city=[setlist.venue?.city?.name,setlist.venue?.city?.country?.name].filter(Boolean).join(", ");
+    const date=formatDate(setlist.eventDate);
+    const tour=setlist.tour?.name||"";
+    const songs=countSongs(setlist);
+    const color=colorFor(artist);
+    document.querySelector(".breadcrumb").innerHTML="<span>"+artist+"</span> "+(tour?"/ "+tour+" ":"")+"/ Shows";
+    document.querySelector(".concert-title").innerHTML=(tour||artist)+"<em>"+venue+" · "+city+"</em>";
+    document.querySelector(".meta-pill.highlight").innerHTML="<svg fill=currentColor viewBox='0 0 16 16' style='width:12px;height:12px'><path d='M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z'/><path d='M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z'/></svg> "+date;
+    const metaPills=document.querySelectorAll(".meta-pill:not(.highlight)");
+    if(metaPills[0]) metaPills[0].innerHTML="<svg fill=currentColor viewBox='0 0 16 16' style='width:12px;height:12px'><path d='M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z'/><path d='M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'/></svg> "+venue+", "+city;
+    const sv=document.querySelectorAll(".stat-val");
+    if(sv[0])sv[0].textContent=songs; if(sv[1])sv[1].textContent="—"; if(sv[2])sv[2].textContent="—";
+    document.querySelector(".hero-img-fake").style.background="linear-gradient(135deg, "+color.split(",")[0]+"22, "+color.split(",")[1]+"18, rgba(20,20,30,0.9))";
+    document.getElementById("logModalSub").textContent=artist+" · "+venue+" · "+date;
+    renderSetlist(setlist);
+    document.querySelector(".hero").style.display="";
+    document.querySelector(".main").style.display="";
+    clearSearch();
+  }
+
+  function renderSetlist(setlist){
+    const container=document.querySelector(".setlist-container");
+    if(!container)return;
+    const sets=setlist.sets?.set||[];
+    if(!sets.length){container.innerHTML="<div class=section-label>Setlist oficial · Setlist.fm</div><div style='padding:32px;text-align:center;color:var(--text-muted);font-size:14px;'>No hay setlist cargado.</div>";return;}
+    let html="<div class=section-label>Setlist oficial · Setlist.fm</div>",num=1;
+    sets.forEach(set=>{
+      const isEncore=set.encore==1||set.name?.toLowerCase().includes("encore");
+      if(isEncore)html+="<div class=encore-divider>Encore</div>";
+      html+="<div class=setlist-set>";
+      if(set.name&&!isEncore)html+="<div class=set-name>"+set.name+"</div>";
+      (set.song||[]).forEach(song=>{
+        const isCover=song.cover?.name;
+        let badges="";
+        if(isCover)badges+="<span class='badge badge-cover'>COVER</span>";
+        if(isEncore)badges+="<span class='badge badge-encore'>ENCORE</span>";
+        if(song.tape)badges+="<span class='badge badge-encore'>TAPE</span>";
+        html+="<div class=song-item><div class=song-num>"+String(num).padStart(2,"0")+"</div><div class=song-play>▶</div><div class=song-name>"+( song.name||"(sin nombre)")+( isCover?" <span style='font-size:11px;color:var(--text-muted)'>(orig. "+song.cover.name+")</span>":"")+"</div><div class=song-badges>"+badges+"</div></div>";
+        num++;
+      });
+      html+="</div>";
+    });
+    container.innerHTML=html;
+  }
+
+  function openLogModal(){if(!session){pendingLog=true;openAuthModal("login");return;}modalRating=0;document.querySelectorAll("#modalStars .star-btn").forEach(s=>s.style.color="");document.getElementById("logModal").style.display="flex";}
+  function closeModal(){document.getElementById("logModal").style.display="none";}
+
+  async function saveLog(){
+    if(!session||!currentSetlist)return;
+    const reviewBody=document.querySelector("#logModal textarea")?.value||"";
+    const btn=document.querySelector("#logModal .btn-primary");
+    btn.textContent="Guardando..."; btn.disabled=true;
+    const s=currentSetlist;
+    try{
+      const res=await fetch("/api/reviews",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.token},body:JSON.stringify({setlistfm_id:s.id,artist_name:s.artist?.name,venue_name:s.venue?.name,city:s.venue?.city?.name,country:s.venue?.city?.country?.name,event_date:s.eventDate?s.eventDate.split("-").reverse().join("-"):null,tour_name:s.tour?.name,song_count:countSongs(s),setlist_data:s,rating:modalRating||null,body:reviewBody})});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error);
+      btn.textContent="✓ Guardado";
+      setTimeout(()=>closeModal(),1200);
+    }catch(err){btn.textContent="Error - intenta de nuevo";setTimeout(()=>{btn.textContent="Guardar en mi coleccion";btn.disabled=false;},2000);}
+  }
+
+  let searchTimer=null,lastQuery="",totalItems=0;
+  function handleSearch(val){document.getElementById("searchClear").classList.toggle("visible",val.length>0);clearTimeout(searchTimer);if(!val.trim()){showInitial();return;}setLoadingState();searchTimer=setTimeout(()=>runSearch(val.trim(),1),600);}
+  async function runSearch(q,page){lastQuery=q;try{const res=await fetch("/api/search?q="+encodeURIComponent(q)+"&p="+page);if(!res.ok){const e=await res.json();throw new Error(e.error||"Error "+res.status);}const data=await res.json();totalItems=data.total||0;renderResults(data.setlist||[],q,totalItems,page);}catch(err){showError(err.message);}}
+
+  function renderResults(setlists,q,total,page){
+    document.getElementById("searchLoading").classList.remove("visible");
+    const withSongs=setlists.filter(s=>countSongs(s)>0);
+    if(!withSongs.length&&page===1){document.getElementById("emptyQuery").textContent=q;document.getElementById("searchEmpty").classList.add("visible");return;}
+    document.getElementById("resultsCount").innerHTML="<strong>"+total.toLocaleString()+"</strong> shows en Setlist.fm para '<strong>"+q+"</strong>'";
+    const grid=document.getElementById("concertGrid");
+    if(page===1)grid.innerHTML="";
+    withSongs.forEach((s,i)=>{
+      const artist=s.artist?.name||"Artista desconocido";
+      const venue=s.venue?.name||"—";
+      const city=[s.venue?.city?.name,s.venue?.city?.country?.name].filter(Boolean).join(", ");
+      const date=formatDate(s.eventDate);
+      const songs=countSongs(s);
+      const tour=s.tour?.name?" · "+s.tour.name:"";
+      const color=colorFor(artist);
+      const card=document.createElement("div");
+      card.className="concert-result-card";
+      card.style.animationDelay=(i%20)*0.04+"s";
+      card.onclick=()=>showDetail(s);
+      card.innerHTML="<div class=card-thumb style='background:linear-gradient(135deg,"+color+");'>" +initials(artist)+"</div><div class=card-main><div class=card-artist>"+artist+"</div><div class=card-title>"+venue+tour+"</div><div class=card-meta><div class=card-meta-item>📍 "+( city||"—")+"</div><div class=card-meta-item>📅 "+date+"</div><div class=card-meta-item>🎵 "+songs+" canciones</div></div></div><div class=card-right><div class=card-rating style='font-size:13px;color:var(--text-muted);'>Setlist.fm</div><div class=card-rating-sub>datos reales</div></div><div class=card-go>›</div>";
+      grid.appendChild(card);
+    });
+    const old=document.getElementById("loadMoreBtn");if(old)old.remove();
+    if(total>page*20){const btn=document.createElement("button");btn.id="loadMoreBtn";btn.className="btn-secondary";btn.style.cssText="width:100%;margin-top:16px;justify-content:center;padding:14px;";btn.textContent="Ver mas resultados ("+(total-page*20)+" restantes)";btn.onclick=()=>{btn.textContent="Cargando...";btn.disabled=true;runSearch(lastQuery,page+1);};grid.after(btn);}
+    document.getElementById("searchResults").style.display="block";
+  }
+
+  function initials(n){return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase();}
+  const COLORS=["#60a5fa,#1d4ed8","#f472b6,#9333ea","#34d399,#059669","#fbbf24,#d97706","#f87171,#dc2626","#e8ff47,#b5cc1a","#c084fc,#7c3aed","#94a3b8,#475569","#fb923c,#c2410c","#2dd4bf,#0d9488"];
+  function colorFor(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))&0xffff;return COLORS[h%COLORS.length];}
+  function formatDate(d){if(!d)return"—";const[day,month,year]=d.split("-");return parseInt(day)+" "+["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][parseInt(month)-1]+" "+year;}
+  function countSongs(s){if(!s?.sets?.set)return 0;return s.sets.set.reduce((a,s)=>a+(s.song?.length||0),0);}
+  function searchFor(a){const f=document.getElementById("searchField");f.value=a;handleSearch(a);f.focus();}
+  function clearSearch(){document.getElementById("searchField").value="";document.getElementById("searchClear").classList.remove("visible");showInitial();}
+  function setLoadingState(){document.getElementById("searchInitial").style.display="none";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.add("visible");}
+  function showInitial(){document.getElementById("searchInitial").style.display="";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.remove("visible");}
+  function showError(msg){document.getElementById("searchLoading").classList.remove("visible");document.querySelector("#searchEmpty .empty-icon").textContent="⚠️";document.querySelector("#searchEmpty .empty-title").textContent=msg;document.querySelector("#searchEmpty .empty-sub").textContent="Verifica que el servidor este corriendo.";document.getElementById("searchEmpty").classList.add("visible");}
+  function toggleFilter(el){document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));el.classList.add("active");}
+
+  function setModalRating(n){modalRating=n;document.querySelectorAll("#modalStars .star-btn").forEach((s,i)=>s.style.color=i<n?"var(--star-active)":"");}
+  document.querySelectorAll(".star-btn").forEach(btn=>{
+    const siblings=()=>btn.parentElement.querySelectorAll(".star-btn");
+    btn.addEventListener("mouseenter",()=>{const idx=[...siblings()].indexOf(btn);siblings().forEach((s,j)=>s.style.color=j<=idx?"var(--star-active)":"");});
+    btn.addEventListener("mouseleave",()=>{siblings().forEach((s,j)=>s.style.color=j<modalRating?"var(--star-active)":"");});
+  });
+  document.getElementById("logModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
+  document.getElementById("authModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAuthModal();});
+
+  function renderKeyBanner(){const b=document.getElementById("apiBanner");if(!b)return;b.innerHTML="<div style='display:flex;align-items:center;gap:10px;font-size:12px;'><span style='color:#4ade80;'>● Servidor local activo</span><span style='color:var(--text-muted);'>API key configurada en .env</span></div>";}
+
+  renderNav();
+  renderKeyBanner();
+</script>
+
+</body>
+</html>
