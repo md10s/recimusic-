@@ -401,47 +401,7 @@ app.get('*', (req, res) => {
 //  INICIAR
 // ════════════════════════════════════════════════════════════════
 
-async function ensureFollowsTable() {
-  // Intentar insertar un registro inválido — si la tabla no existe, el error lo dice
-  const check = await sbFetch('/follows?limit=1');
-  if (check.status === 404 || (typeof check.data === 'string' && check.data.includes('does not exist'))) {
-    console.log('  ⚙️  Tabla follows no existe — creándola vía Supabase Management API...');
-    // Crear via SQL REST endpoint (solo disponible con service_role key)
-    const sql = `
-      CREATE TABLE IF NOT EXISTS follows (
-        id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-        follower_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-        following_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-        created_at timestamptz DEFAULT now(),
-        UNIQUE(follower_id, following_id)
-      );
-      ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
-      DO $$ BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='follows' AND policyname='follows_select') THEN
-          CREATE POLICY follows_select ON follows FOR SELECT USING (true);
-        END IF;
-        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='follows' AND policyname='follows_insert') THEN
-          CREATE POLICY follows_insert ON follows FOR INSERT WITH CHECK (auth.uid() = follower_id);
-        END IF;
-        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='follows' AND policyname='follows_delete') THEN
-          CREATE POLICY follows_delete ON follows FOR DELETE USING (auth.uid() = follower_id);
-        END IF;
-      END $$;
-    `;
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`, {
-      method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sql }),
-    });
-    if (res.ok) console.log('  ✅  Tabla follows creada correctamente.');
-    else console.log('  ⚠️  No se pudo crear la tabla follows automáticamente. Creala manualmente en Supabase SQL Editor.');
-  } else {
-    console.log('  ✅  Tabla follows OK.');
-  }
-}
-
-app.listen(PORT, async () => {
-  await ensureFollowsTable();
+app.listen(PORT, () => {
   console.log('');
   console.log('  ██████ ███████ ████████ ██       ██████   ██████  ');
   console.log('  ██      ██        ██    ██      ██    ██ ██       ');
