@@ -1189,15 +1189,6 @@
 <div id="searchScreen" class="search-screen active">
 
   <div class="search-hero">
-    <!-- API KEY BANNER -->
-    <div id="apiBanner" style="
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin-bottom: 28px;
-    "></div>
-
     <div class="search-eyebrow">Buscá cualquier show</div>
     <h1 class="search-title">Explorá <span>Recitales</span></h1>
 
@@ -1752,10 +1743,7 @@
   document.getElementById("logModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
   document.getElementById("authModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAuthModal();});
 
-  function renderKeyBanner(){const b=document.getElementById("apiBanner");if(!b)return;b.innerHTML="<div style='display:flex;align-items:center;gap:10px;font-size:12px;'><span style='color:#4ade80;'>● Servidor local activo</span><span style='color:var(--text-muted);'>API key configurada en .env</span></div>";}
-
   renderNav();
-  renderKeyBanner();
 </script>
 
 </body>
