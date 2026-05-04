@@ -1022,6 +1022,55 @@
     gap: 2px;
   }
 
+  /* ── AMIGOS ── */
+  .amigos-tab {
+    flex: 1; padding: 8px; border: none; border-radius: 7px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; background: transparent; color: var(--text-muted);
+    transition: all .2s;
+  }
+  .amigos-tab:hover { color: var(--text); }
+  .active-tab { background: var(--surface3) !important; color: var(--text) !important; }
+
+  .user-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px;
+    transition: border-color .2s;
+  }
+  .user-card:hover { border-color: rgba(255,255,255,0.13); }
+  .user-card-avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: #000;
+  }
+  .user-card-info { flex: 1; }
+  .user-card-name { font-size: 15px; font-weight: 500; }
+  .user-card-sub  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .follow-btn {
+    padding: 7px 16px; border-radius: 7px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: all .2s;
+    border: 1px solid var(--border);
+  }
+  .follow-btn.following {
+    background: transparent; color: var(--text-muted);
+  }
+  .follow-btn.following:hover { background: rgba(255,80,80,0.08); border-color: rgba(255,80,80,0.3); color: #ff5050; }
+  .follow-btn.not-following {
+    background: var(--accent); color: #000; border-color: var(--accent);
+  }
+  .follow-btn.not-following:hover { opacity: 0.85; }
+
+  .feed-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px; transition: border-color .2s; cursor: pointer;
+  }
+  .feed-card:hover { border-color: rgba(255,255,255,0.13); }
+  .feed-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .feed-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .feed-card-show { font-size: 15px; font-weight: 500; }
+  .feed-card-artist { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+
   /* ── HAMBURGER ── */
   .nav-hamburger {
     display: none;
@@ -1141,7 +1190,7 @@
   <ul class="nav-links">
     <li onclick="showSearch()" id="nav-explorar" style="color:var(--accent)">Explorar</li>
     <li onclick="requireAuth(showColeccion)">Mi Colección</li>
-    <li>Amigos</li>
+    <li onclick="showAmigos()">Amigos</li>
     <li>Estadísticas</li>
   </ul>
   <div id="navAuth"></div>
@@ -1165,7 +1214,7 @@
 <ul class="nav-mobile-menu" id="mobileMenu">
   <li onclick="closeMobileMenu();showSearch()" style="color:var(--accent)">Explorar</li>
   <li onclick="closeMobileMenu();requireAuth(showColeccion)">Mi Colección</li>
-  <li>Amigos</li>
+  <li onclick="closeMobileMenu();showAmigos()">Amigos</li>
   <li>Estadísticas</li>
   <div class="nav-mobile-auth" id="mobileAuth"></div>
 </ul>
@@ -1557,6 +1606,40 @@
   </div>
 </div>
 
+<!-- AMIGOS SCREEN -->
+<div id="amigosScreen" style="display:none; position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto; padding-top:60px;">
+  <div style="max-width:860px; margin:0 auto; padding:48px 32px;">
+
+    <div style="font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px;">Comunidad</div>
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:2px; margin-bottom:32px;">Amigos</div>
+
+    <!-- Buscar usuarios -->
+    <div style="margin-bottom:40px;">
+      <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:14px; display:flex; align-items:center; gap:12px;">Buscar usuarios <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
+      <div style="position:relative; margin-bottom:12px;">
+        <input id="userSearchField" type="text" placeholder="Nombre de usuario…" autocomplete="off"
+          style="width:100%; background:var(--surface); border:1.5px solid var(--border); border-radius:10px; color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px; padding:14px 20px; outline:none; transition:border-color .2s;"
+          oninput="handleUserSearch(this.value)"
+          onfocus="this.style.borderColor='rgba(232,255,71,0.4)'"
+          onblur="this.style.borderColor='var(--border)'" />
+      </div>
+      <div id="userSearchResults" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+
+    <!-- Tabs: Siguiendo / Seguidores / Feed / En común -->
+    <div style="display:flex; gap:0; background:var(--surface2); border-radius:10px; padding:4px; margin-bottom:24px;">
+      <button onclick="switchAmigosTab('feed')"      id="tabFeed"      class="amigos-tab active-tab">Actividad</button>
+      <button onclick="switchAmigosTab('following')" id="tabFollowing" class="amigos-tab">Siguiendo</button>
+      <button onclick="switchAmigosTab('followers')" id="tabFollowers" class="amigos-tab">Seguidores</button>
+    </div>
+
+    <div id="amigosContent" style="display:flex; flex-direction:column; gap:10px;">
+      <div style="text-align:center; padding:48px; color:var(--text-muted); font-size:14px;">Cargando…</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- LOG MODAL -->
 <div id="logModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:200; align-items:center; justify-content:center;">
   <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; width:480px; max-width:90vw; animation: slideUp .3s ease both;">
@@ -1667,6 +1750,7 @@
     document.getElementById("searchScreen").classList.remove("active");
     document.querySelector(".hero").style.display="none";
     document.querySelector(".main").style.display="none";
+    document.getElementById("amigosScreen").style.display="none";
     document.getElementById("coleccionScreen").style.display="block";
     document.getElementById("colUsername").textContent=session.username;
     const res=await fetch("/api/reviews/me",{headers:{"Authorization":"Bearer "+session.token}});
@@ -1819,6 +1903,7 @@
     document.querySelector(".hero").style.display="none";
     document.querySelector(".main").style.display="none";
     document.getElementById("coleccionScreen").style.display="none";
+    document.getElementById("amigosScreen").style.display="none";
     document.getElementById("nav-explorar").style.color="var(--accent)";
     loadPopular();
   }
@@ -1967,6 +2052,125 @@
   });
   document.getElementById("logModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
   document.getElementById("authModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAuthModal();});
+
+  // ── AMIGOS ──────────────────────────────────────────────────────
+  let amigosTab = 'feed';
+  let amigosData = { following: [], followers: [] };
+
+  function showAmigos() {
+    if (!session) { openAuthModal('login'); return; }
+    document.getElementById('searchScreen').classList.remove('active');
+    document.querySelector('.hero').style.display = 'none';
+    document.querySelector('.main').style.display = 'none';
+    document.getElementById('coleccionScreen').style.display = 'none';
+    document.getElementById('amigosScreen').style.display = 'block';
+    document.getElementById('nav-explorar').style.color = '';
+    closeMobileMenu();
+    loadAmigos();
+  }
+
+  async function loadAmigos() {
+    const res = await fetch('/api/follows/me', { headers: { 'Authorization': 'Bearer ' + session.token } });
+    amigosData = await res.json();
+    switchAmigosTab(amigosTab);
+  }
+
+  function switchAmigosTab(tab) {
+    amigosTab = tab;
+    ['feed','following','followers'].forEach(t => {
+      document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))?.classList.toggle('active-tab', t === tab);
+    });
+    if (tab === 'feed')      loadFeed();
+    if (tab === 'following') renderUserList(amigosData.following || [], 'following');
+    if (tab === 'followers') renderUserList(amigosData.followers || [], 'followers');
+  }
+
+  async function loadFeed() {
+    const content = document.getElementById('amigosContent');
+    content.innerHTML = '<div style="text-align:center;padding:48px;color:var(--text-muted);font-size:14px;">Cargando actividad…</div>';
+    const res = await fetch('/api/follows/feed', { headers: { 'Authorization': 'Bearer ' + session.token } });
+    const feed = await res.json();
+    if (!feed.length) {
+      content.innerHTML = '<div style="text-align:center;padding:64px 32px;color:var(--text-muted);font-size:14px;">Todavía no hay actividad.<br><span style="font-size:12px;">Seguí usuarios para ver sus shows acá.</span></div>';
+      return;
+    }
+    content.innerHTML = feed.map(r => {
+      const username = r.profiles?.username || 'usuario';
+      const c = r.concerts;
+      const color = colorFor(username);
+      const stars = r.rating ? '★'.repeat(r.rating) + '<span style="color:var(--star-inactive)">★</span>'.repeat(5 - r.rating) : '';
+      const date = new Date(r.created_at).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+      return `<div class="feed-card" onclick='loadAndShowDetail(${JSON.stringify(c?.setlistfm_id)})'>
+        <div class="feed-card-header">
+          <div class="user-card-avatar" style="width:34px;height:34px;font-size:13px;background:linear-gradient(135deg,${color});">${username.slice(0,2).toUpperCase()}</div>
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;">${username} <span style="color:var(--text-muted);font-weight:300;">loggeó un show</span></div>
+            <div class="feed-card-meta">${date}</div>
+          </div>
+          <div style="color:var(--star-active);font-size:14px;">${stars}</div>
+        </div>
+        <div class="feed-card-artist">${c?.artist_name || '—'}</div>
+        <div class="feed-card-show">${c?.venue_name || '—'}${c?.tour_name ? ' · ' + c.tour_name : ''}</div>
+        <div class="feed-card-meta" style="margin-top:4px;">📍 ${c?.city || '—'} · 📅 ${c?.event_date || '—'}</div>
+        ${r.body ? `<div style="margin-top:10px;font-size:13px;color:#c8c8d0;line-height:1.6;padding-top:10px;border-top:1px solid var(--border);">"${r.body}"</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function renderUserList(users, type) {
+    const content = document.getElementById('amigosContent');
+    if (!users.length) {
+      const msg = type === 'following' ? 'No seguís a nadie todavía.' : 'Nadie te sigue todavía.';
+      content.innerHTML = `<div style="text-align:center;padding:64px 32px;color:var(--text-muted);font-size:14px;">${msg}<br><span style="font-size:12px;">Buscá usuarios arriba para conectar.</span></div>`;
+      return;
+    }
+    const followingIds = new Set((amigosData.following || []).map(f => f.id));
+    content.innerHTML = users.map(u => renderUserCard(u, followingIds.has(u.id))).join('');
+  }
+
+  function renderUserCard(u, isFollowing) {
+    const color = colorFor(u.username || '');
+    return `<div class="user-card">
+      <div class="user-card-avatar" style="background:linear-gradient(135deg,${color});">${(u.username||'?').slice(0,2).toUpperCase()}</div>
+      <div class="user-card-info"><div class="user-card-name">${u.username}</div></div>
+      <button class="follow-btn ${isFollowing ? 'following' : 'not-following'}" id="followbtn-${u.username}"
+        onclick="toggleFollow('${u.username}', ${isFollowing})">${isFollowing ? 'Siguiendo' : 'Seguir'}</button>
+    </div>`;
+  }
+
+  async function toggleFollow(username, isFollowing) {
+    if (!session) { openAuthModal('login'); return; }
+    const btn = document.getElementById('followbtn-' + username);
+    btn.disabled = true; btn.textContent = '…';
+    const res = await fetch('/api/follows/' + encodeURIComponent(username), {
+      method: isFollowing ? 'DELETE' : 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.token }
+    });
+    if (res.ok) {
+      const nowFollowing = !isFollowing;
+      btn.textContent = nowFollowing ? 'Siguiendo' : 'Seguir';
+      btn.className = 'follow-btn ' + (nowFollowing ? 'following' : 'not-following');
+      btn.onclick = () => toggleFollow(username, nowFollowing);
+      if (nowFollowing) amigosData.following = [...(amigosData.following||[]), { username }];
+      else amigosData.following = (amigosData.following||[]).filter(f => f.username !== username);
+    } else { btn.textContent = isFollowing ? 'Siguiendo' : 'Seguir'; }
+    btn.disabled = false;
+  }
+
+  let userSearchTimer2 = null;
+  function handleUserSearch(val) {
+    clearTimeout(userSearchTimer2);
+    const results = document.getElementById('userSearchResults');
+    if (!val.trim() || val.trim().length < 2) { results.innerHTML = ''; return; }
+    results.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">Buscando…</div>';
+    userSearchTimer2 = setTimeout(async () => {
+      const headers = session ? { 'Authorization': 'Bearer ' + session.token } : {};
+      const res = await fetch('/api/users/search?q=' + encodeURIComponent(val.trim()), { headers });
+      const users = await res.json();
+      if (!users.length) { results.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">Sin resultados.</div>'; return; }
+      results.innerHTML = users.map(u => renderUserCard(u, u.is_following || false)).join('');
+    }, 500);
+  }
 
   // ── TEMA ────────────────────────────────────────────────────────
   function setTheme(theme) {

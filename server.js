@@ -238,6 +238,117 @@ app.get('/api/reviews/me', async (req, res) => {
   res.json(result.data || []);
 });
 
+
+// ════════════════════════════════════════════════════════════════
+//  FOLLOWS / AMIGOS
+// ════════════════════════════════════════════════════════════════
+
+async function getUserFromToken(token) {
+  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` },
+  });
+  return await res.json();
+}
+
+app.post('/api/follows/:username', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autenticado.' });
+  const user = await getUserFromToken(token);
+  if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
+  const target = await sbFetch(`/profiles?username=eq.${encodeURIComponent(req.params.username)}&select=id`);
+  if (!target.data?.length) return res.status(404).json({ error: 'Usuario no encontrado.' });
+  const followingId = target.data[0].id;
+  if (followingId === user.id) return res.status(400).json({ error: 'No podés seguirte a vos mismo.' });
+  const result = await sbFetch('/follows', {
+    method: 'POST', token,
+    headers: { 'Prefer': 'resolution=ignore-duplicates,return=representation' },
+    body: JSON.stringify({ follower_id: user.id, following_id: followingId }),
+  });
+  if (!result.ok) return res.status(400).json({ error: 'Error al seguir usuario.', detail: result.data });
+  res.json({ ok: true });
+});
+
+app.delete('/api/follows/:username', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autenticado.' });
+  const user = await getUserFromToken(token);
+  if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
+  const target = await sbFetch(`/profiles?username=eq.${encodeURIComponent(req.params.username)}&select=id`);
+  if (!target.data?.length) return res.status(404).json({ error: 'Usuario no encontrado.' });
+  const followingId = target.data[0].id;
+  await sbFetch(`/follows?follower_id=eq.${user.id}&following_id=eq.${followingId}`, { method: 'DELETE', token });
+  res.json({ ok: true });
+});
+
+app.get('/api/follows/me', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autenticado.' });
+  const user = await getUserFromToken(token);
+  if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
+  const [following, followers] = await Promise.all([
+    sbFetch(`/follows?follower_id=eq.${user.id}&select=following_id,profiles!follows_following_id_fkey(username)`),
+    sbFetch(`/follows?following_id=eq.${user.id}&select=follower_id,profiles!follows_follower_id_fkey(username)`),
+  ]);
+  res.json({
+    following: (following.data || []).map(f => ({ id: f.following_id, username: f.profiles?.username })),
+    followers: (followers.data || []).map(f => ({ id: f.follower_id, username: f.profiles?.username })),
+  });
+});
+
+app.get('/api/follows/feed', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autenticado.' });
+  const user = await getUserFromToken(token);
+  if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
+  const followingRes = await sbFetch(`/follows?follower_id=eq.${user.id}&select=following_id`);
+  const ids = (followingRes.data || []).map(f => f.following_id);
+  if (!ids.length) return res.json([]);
+  const inClause = `(${ids.map(id => `"${id}"`).join(',')})`;
+  const feed = await sbFetch(
+    `/reviews?user_id=in.${inClause}&select=*,profiles(username),concerts(artist_name,venue_name,city,event_date,tour_name,setlistfm_id)&order=created_at.desc&limit=30`
+  );
+  res.json(feed.data || []);
+});
+
+app.get('/api/users/search', async (req, res) => {
+  const { q } = req.query;
+  if (!q || q.trim().length < 2) return res.status(400).json({ error: 'Mínimo 2 caracteres.' });
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  let myId = null;
+  if (token) { const u = await getUserFromToken(token); myId = u.id || null; }
+  const result = await sbFetch(`/profiles?username=ilike.*${encodeURIComponent(q.trim())}*&select=id,username&limit=10`);
+  const users = (result.data || []).filter(u => u.id !== myId);
+  if (myId && users.length) {
+    const followingRes = await sbFetch(`/follows?follower_id=eq.${myId}&select=following_id`);
+    const followingIds = new Set((followingRes.data || []).map(f => f.following_id));
+    users.forEach(u => u.is_following = followingIds.has(u.id));
+  }
+  res.json(users);
+});
+
+app.get('/api/users/:username/common', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autenticado.' });
+  const user = await getUserFromToken(token);
+  if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
+  const target = await sbFetch(`/profiles?username=eq.${encodeURIComponent(req.params.username)}&select=id`);
+  if (!target.data?.length) return res.status(404).json({ error: 'Usuario no encontrado.' });
+  const targetId = target.data[0].id;
+  const [myReviews, theirReviews] = await Promise.all([
+    sbFetch(`/reviews?user_id=eq.${user.id}&select=concert_id,rating`),
+    sbFetch(`/reviews?user_id=eq.${targetId}&select=concert_id,rating`),
+  ]);
+  const myMap = new Map((myReviews.data || []).map(r => [r.concert_id, r.rating]));
+  const commonIds = (theirReviews.data || []).filter(r => myMap.has(r.concert_id)).map(r => r.concert_id);
+  if (!commonIds.length) return res.json([]);
+  const concerts = await sbFetch(`/concerts?id=in.(${commonIds.join(',')})&select=id,artist_name,venue_name,city,event_date,setlistfm_id`);
+  res.json((concerts.data || []).map(c => ({
+    ...c,
+    my_rating: myMap.get(c.id),
+    their_rating: (theirReviews.data || []).find(r => r.concert_id === c.id)?.rating,
+  })));
+});
+
 // ════════════════════════════════════════════════════════════════
 //  SETLIST.FM PROXY
 // ════════════════════════════════════════════════════════════════
@@ -289,7 +400,48 @@ app.get('*', (req, res) => {
 // ════════════════════════════════════════════════════════════════
 //  INICIAR
 // ════════════════════════════════════════════════════════════════
-app.listen(PORT, () => {
+
+async function ensureFollowsTable() {
+  // Intentar insertar un registro inválido — si la tabla no existe, el error lo dice
+  const check = await sbFetch('/follows?limit=1');
+  if (check.status === 404 || (typeof check.data === 'string' && check.data.includes('does not exist'))) {
+    console.log('  ⚙️  Tabla follows no existe — creándola vía Supabase Management API...');
+    // Crear via SQL REST endpoint (solo disponible con service_role key)
+    const sql = `
+      CREATE TABLE IF NOT EXISTS follows (
+        id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+        follower_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+        following_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+        created_at timestamptz DEFAULT now(),
+        UNIQUE(follower_id, following_id)
+      );
+      ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
+      DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='follows' AND policyname='follows_select') THEN
+          CREATE POLICY follows_select ON follows FOR SELECT USING (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='follows' AND policyname='follows_insert') THEN
+          CREATE POLICY follows_insert ON follows FOR INSERT WITH CHECK (auth.uid() = follower_id);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='follows' AND policyname='follows_delete') THEN
+          CREATE POLICY follows_delete ON follows FOR DELETE USING (auth.uid() = follower_id);
+        END IF;
+      END $$;
+    `;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sql }),
+    });
+    if (res.ok) console.log('  ✅  Tabla follows creada correctamente.');
+    else console.log('  ⚠️  No se pudo crear la tabla follows automáticamente. Creala manualmente en Supabase SQL Editor.');
+  } else {
+    console.log('  ✅  Tabla follows OK.');
+  }
+}
+
+app.listen(PORT, async () => {
+  await ensureFollowsTable();
   console.log('');
   console.log('  ██████ ███████ ████████ ██       ██████   ██████  ');
   console.log('  ██      ██        ██    ██      ██    ██ ██       ');
