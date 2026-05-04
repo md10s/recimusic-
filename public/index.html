@@ -22,6 +22,86 @@
     --star-inactive: #2a2a30;
   }
 
+  [data-theme="gray"] {
+    --bg: #1c1c21;
+    --surface: #26262d;
+    --surface2: #2e2e38;
+    --surface3: #38383f;
+    --border: rgba(255,255,255,0.09);
+    --accent: #e8ff47;
+    --accent2: #ff6b35;
+    --text: #eeeef2;
+    --text-muted: #8888a0;
+    --text-dim: #55556a;
+    --star-active: #e8ff47;
+    --star-inactive: #35353f;
+  }
+
+  [data-theme="light"] {
+    --bg: #f4f4f6;
+    --surface: #ffffff;
+    --surface2: #ededf0;
+    --surface3: #e2e2e8;
+    --border: rgba(0,0,0,0.08);
+    --accent: #6b8c00;
+    --accent2: #e05a1e;
+    --text: #111113;
+    --text-muted: #777788;
+    --text-dim: #aaaabc;
+    --star-active: #6b8c00;
+    --star-inactive: #d8d8e0;
+  }
+
+  [data-theme="light"] nav {
+    background: rgba(244,244,246,0.9);
+  }
+  [data-theme="light"] .search-screen {
+    background: var(--bg);
+  }
+  [data-theme="light"] .hero-bg {
+    background:
+      radial-gradient(ellipse 80% 100% at 60% 40%, rgba(107,140,0,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 70% at 20% 60%, rgba(224,90,30,0.06) 0%, transparent 50%),
+      #f4f4f6;
+  }
+  [data-theme="light"] .hero-vignette {
+    background: linear-gradient(to right, var(--bg) 0%, rgba(244,244,246,0.85) 35%, rgba(244,244,246,0.3) 60%, transparent 80%);
+  }
+  [data-theme="light"] .hero-vignette-bottom {
+    background: linear-gradient(to top, var(--bg), transparent);
+  }
+  [data-theme="light"] .nav-avatar {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+  }
+
+  /* ── THEME SWITCHER ── */
+  .theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 3px;
+  }
+  .theme-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    background: transparent;
+    transition: background .2s;
+    position: relative;
+  }
+  .theme-btn:hover { background: var(--surface3); }
+  .theme-btn.active { background: var(--surface3); box-shadow: inset 0 0 0 1.5px var(--border); }
+  .theme-btn .theme-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -941,6 +1021,116 @@
     display: flex;
     gap: 2px;
   }
+
+  /* ── HAMBURGER ── */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px;
+    background: none;
+    border: none;
+  }
+  .nav-hamburger span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: all .25s;
+  }
+  .nav-mobile-menu {
+    display: none;
+    position: fixed;
+    top: 60px; left: 0; right: 0;
+    background: rgba(10,10,11,0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    z-index: 99;
+    padding: 16px 24px 24px;
+    flex-direction: column;
+    gap: 0;
+  }
+  .nav-mobile-menu.open { display: flex; }
+  .nav-mobile-menu li {
+    list-style: none;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color .2s;
+  }
+  .nav-mobile-menu li:last-child { border-bottom: none; }
+  .nav-mobile-menu li:hover { color: var(--text); }
+  .nav-mobile-auth { margin-top: 16px; display: flex; gap: 8px; }
+
+  /* ── TABLET ── */
+  @media (max-width: 900px) {
+    .main {
+      grid-template-columns: 1fr;
+      padding: 32px 24px;
+    }
+    .left-col { padding-right: 0; }
+    .right-col { display: none; }
+    .hero-img-container { display: none; }
+    .hero-vignette { background: linear-gradient(to right, var(--bg) 0%, rgba(10,10,11,0.9) 100%); }
+    .hero-content { width: 100%; padding: 0 32px 40px; }
+    .concert-title { font-size: clamp(40px, 8vw, 64px); }
+    .stats-band { position: relative; display: flex; justify-content: flex-start; }
+    .hero { height: auto; min-height: 380px; }
+    .search-hero { padding: 32px 24px 24px; }
+    .search-body { padding: 0 24px 60px; }
+    .search-title { font-size: 40px; }
+    .popular-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+    #navAuth { display: none; }
+
+    .hero { min-height: 320px; }
+    .hero-content { padding: 0 20px 32px; }
+    .concert-title { font-size: clamp(36px, 10vw, 52px); }
+    .meta-row { gap: 10px; }
+    .meta-pill { font-size: 11px; padding: 5px 10px; }
+    .hero-actions { flex-wrap: wrap; }
+    .hero-actions .btn-primary,
+    .hero-actions .btn-secondary { flex: 1; justify-content: center; min-width: 140px; }
+    .stats-band { flex-wrap: wrap; }
+    .stat-block { flex: 1; min-width: 80px; padding: 12px 16px; }
+    .stat-val { font-size: 22px; }
+
+    .main { padding: 24px 16px; gap: 0; }
+
+    .song-item { padding: 10px 10px; }
+    .song-name { font-size: 14px; }
+
+    .review-card { padding: 16px; }
+    .write-review-card { padding: 16px; }
+
+    .search-hero { padding: 24px 16px 16px; }
+    .search-body { padding: 0 16px 60px; }
+    .search-title { font-size: 32px; margin-bottom: 20px; }
+    .search-field { font-size: 15px; padding: 14px 48px 14px 44px; }
+    .search-filters { gap: 6px; }
+    .filter-chip { font-size: 11px; padding: 5px 12px; }
+    .popular-grid { grid-template-columns: 1fr; }
+    .artist-pill-row { gap: 8px; }
+
+    .concert-result-card { padding: 12px 14px; gap: 12px; }
+    .card-thumb { width: 44px; height: 44px; }
+    .card-title { font-size: 14px; }
+    .card-meta { gap: 8px; font-size: 11px; flex-wrap: wrap; }
+    .card-right { display: none; }
+
+    #coleccionScreen > div { padding: 32px 16px; }
+  }
 </style>
 </head>
 <body>
@@ -955,7 +1145,30 @@
     <li>Estadísticas</li>
   </ul>
   <div id="navAuth"></div>
+  <div class="theme-switcher" id="themeSwitcher">
+    <button class="theme-btn active" id="btnDark"  onclick="setTheme('dark')"  title="Oscuro">
+      <div class="theme-dot" style="background:#111113;border:1.5px solid #444;"></div>
+    </button>
+    <button class="theme-btn" id="btnGray"  onclick="setTheme('gray')"  title="Gris">
+      <div class="theme-dot" style="background:#2e2e38;border:1.5px solid #555;"></div>
+    </button>
+    <button class="theme-btn" id="btnLight" onclick="setTheme('light')" title="Claro">
+      <div class="theme-dot" style="background:#f4f4f6;border:1.5px solid #ccc;"></div>
+    </button>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn" aria-label="Menú">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- MOBILE MENU -->
+<ul class="nav-mobile-menu" id="mobileMenu">
+  <li onclick="closeMobileMenu();showSearch()" style="color:var(--accent)">Explorar</li>
+  <li onclick="closeMobileMenu();requireAuth(showColeccion)">Mi Colección</li>
+  <li>Amigos</li>
+  <li>Estadísticas</li>
+  <div class="nav-mobile-auth" id="mobileAuth"></div>
+</ul>
 
 <!-- HERO -->
 <div class="hero">
@@ -1385,12 +1598,24 @@
   let modalRating = 0;
   let pendingLog = false;
 
+  function toggleMobileMenu() {
+    const menu = document.getElementById("mobileMenu");
+    menu.classList.toggle("open");
+  }
+  function closeMobileMenu() {
+    document.getElementById("mobileMenu").classList.remove("open");
+  }
+
   function renderNav() {
     const el = document.getElementById("navAuth");
+    const mob = document.getElementById("mobileAuth");
     if (session) {
-      el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;"><span style="font-size:13px;color:var(--text-muted);">Hola, <strong style="color:var(--text);">${session.username}</strong></span><div class="nav-avatar" style="cursor:pointer;" onclick="requireAuth(showColeccion)">${session.username.slice(0,2).toUpperCase()}</div><button onclick="logout()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);font-family:DM Sans,sans-serif;font-size:12px;padding:5px 12px;cursor:pointer;">Salir</button></div>`;
+      const desktop = `<div style="display:flex;align-items:center;gap:12px;"><span style="font-size:13px;color:var(--text-muted);">Hola, <strong style="color:var(--text);">${session.username}</strong></span><div class="nav-avatar" style="cursor:pointer;" onclick="requireAuth(showColeccion)">${session.username.slice(0,2).toUpperCase()}</div><button onclick="logout()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);font-family:DM Sans,sans-serif;font-size:12px;padding:5px 12px;cursor:pointer;">Salir</button></div>`;
+      el.innerHTML = desktop;
+      if(mob) mob.innerHTML = `<button onclick="closeMobileMenu();requireAuth(showColeccion)" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px;cursor:pointer;">${session.username}</button><button onclick="logout()" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text-muted);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 16px;cursor:pointer;">Salir</button>`;
     } else {
       el.innerHTML = `<div style="display:flex;align-items:center;gap:8px;"><button onclick="openAuthModal('login')" style="background:none;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:DM Sans,sans-serif;font-size:13px;padding:7px 16px;cursor:pointer;">Iniciar sesion</button><button onclick="openAuthModal('register')" style="background:var(--accent);border:none;border-radius:6px;color:#000;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;padding:7px 16px;cursor:pointer;">Registrarse</button></div>`;
+      if(mob) mob.innerHTML = `<button onclick="closeMobileMenu();openAuthModal('login')" style="flex:1;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px;cursor:pointer;">Iniciar sesión</button><button onclick="closeMobileMenu();openAuthModal('register')" style="flex:1;background:var(--accent);border:none;border-radius:6px;color:#000;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;padding:10px;cursor:pointer;">Registrarse</button>`;
     }
   }
 
@@ -1742,6 +1967,22 @@
   });
   document.getElementById("logModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeModal();});
   document.getElementById("authModal").addEventListener("click",e=>{if(e.target===e.currentTarget)closeAuthModal();});
+
+  // ── TEMA ────────────────────────────────────────────────────────
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('setlog_theme', theme);
+    ['dark','gray','light'].forEach(t => {
+      const btn = document.getElementById('btn' + t.charAt(0).toUpperCase() + t.slice(1));
+      if (btn) btn.classList.toggle('active', t === theme);
+    });
+  }
+  const savedTheme = localStorage.getItem('setlog_theme') || 'dark';
+  setTheme(savedTheme);
 
   renderNav();
 </script>
