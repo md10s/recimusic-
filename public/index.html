@@ -985,9 +985,9 @@
         <svg fill="currentColor" viewBox="0 0 16 16"><path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z"/><path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
         Estadio Monumental, BsAs
       </div>
-      <div class="meta-pill">
-        <svg fill="currentColor" viewBox="0 0 16 16"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
-        3.984 asistentes loggearon
+      <div class="meta-pill" id="metaReviewCount" style="display:none;">
+        <svg fill="currentColor" viewBox="0 0 16 16" style="width:12px;height:12px"><path d="M7 14s-1 0-1-1 1-4 5-4 5 3 5 4-1 1-1 1H7zm4-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path fill-rule="evenodd" d="M5.216 14A2.238 2.238 0 0 1 5 13c0-1.355.68-2.75 1.936-3.72A6.325 6.325 0 0 0 5 9c-4 0-5 3-5 4s1 1 1 1h4.216z"/><path d="M4.5 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+        <span id="metaReviewCountText"></span>
       </div>
     </div>
     <div class="hero-actions">
@@ -1008,11 +1008,11 @@
       <div class="stat-label">Canciones</div>
     </div>
     <div class="stat-block">
-      <div class="stat-val">3h 42m</div>
-      <div class="stat-label">Duración</div>
+      <div class="stat-val">—</div>
+      <div class="stat-label">Reviews</div>
     </div>
     <div class="stat-block">
-      <div class="stat-val">4.9</div>
+      <div class="stat-val">—</div>
       <div class="stat-label">Rating</div>
     </div>
   </div>
@@ -1144,10 +1144,10 @@
 
     <!-- REVIEWS -->
     <div class="reviews-section animate-in">
-      <div class="section-label">Reseñas · 847 en total</div>
+      <div class="section-label" id="reviewsLabel">Reseñas</div>
 
       <!-- Write review -->
-      <div class="write-review-card">
+      <div class="write-review-card" id="writeReviewCard" style="display:none;">
         <div style="font-size:13px; font-weight:500; margin-bottom:12px;">Tu reseña</div>
         <div class="rating-input" id="ratingInput">
           <button class="star-btn" onclick="setRating(1)">★</button>
@@ -1156,70 +1156,15 @@
           <button class="star-btn" onclick="setRating(4)">★</button>
           <button class="star-btn" onclick="setRating(5)">★</button>
         </div>
-        <textarea class="review-input" placeholder="¿Qué recordás de este show? Momentos únicos, el setlist, la energía del estadio…"></textarea>
+        <textarea class="review-input" id="inlineReviewText" placeholder="¿Qué recordás de este show? Momentos únicos, el setlist, la energía del estadio…"></textarea>
         <div class="review-footer">
-          <div class="date-tag">
-            <svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>
-            18 Nov 2023
-          </div>
-          <button class="btn-primary" style="padding: 9px 18px; font-size:13px;">Publicar reseña</button>
+          <div class="date-tag" id="inlineReviewDate"></div>
+          <button class="btn-primary" style="padding: 9px 18px; font-size:13px;" onclick="saveInlineReview()">Publicar reseña</button>
         </div>
       </div>
 
-      <!-- Review cards -->
-      <div class="review-card">
-        <div class="review-header">
-          <div class="reviewer-avatar" style="background: linear-gradient(135deg, #e8ff47, #b5cc1a);">LG</div>
-          <div class="reviewer-info">
-            <div class="reviewer-name">lucía_goes</div>
-            <div class="review-date">19 nov 2023 · 8 shows loggeados</div>
-          </div>
-          <div class="review-stars">
-            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
-          </div>
-        </div>
-        <div class="review-text">Cuando arrancó con Cruel Summer pensé que me desmayaba. El Monumental repleto cantando cada palabra de All Too Well fue la experiencia colectiva más intensa de mi vida. No hay show que la iguale — y tengo 23 loggeados.</div>
-        <div class="review-likes">
-          <svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
-          342 útiles
-        </div>
-      </div>
-
-      <div class="review-card">
-        <div class="review-header">
-          <div class="reviewer-avatar" style="background: linear-gradient(135deg, #ff6b35, #e8273d);">MV</div>
-          <div class="reviewer-info">
-            <div class="reviewer-name">mateo.vidal</div>
-            <div class="review-date">20 nov 2023 · 15 shows loggeados</div>
-          </div>
-          <div class="review-stars">
-            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-empty">★</span>
-          </div>
-        </div>
-        <div class="review-text">Producción impecable. El cambio de sets entre eras es una locura logística. Le saqué una estrella porque el sonido en el sector campo tuvo problemas en la primera hora, pero para el All Too Well ya estaba todo solucionado.</div>
-        <div class="review-likes">
-          <svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
-          187 útiles
-        </div>
-      </div>
-
-      <div class="review-card">
-        <div class="review-header">
-          <div class="reviewer-avatar" style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">SR</div>
-          <div class="reviewer-info">
-            <div class="reviewer-name">sof.ruiz__</div>
-            <div class="review-date">18 nov 2023 · 3 shows loggeados</div>
-          </div>
-          <div class="review-stars">
-            <span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span><span class="star-filled">★</span>
-          </div>
-        </div>
-        <div class="review-text">Primera vez en un recital de estadio. Sí o sí iba a ser abrumador, pero la forma en que Taylor maneja la energía del público — los 80.000 juntos cantando, los mares de pulseras — fue algo que no voy a olvidar nunca.</div>
-        <div class="review-likes">
-          <svg width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
-          95 útiles
-        </div>
-      </div>
+      <!-- Dynamic review cards -->
+      <div id="reviewsList"></div>
     </div>
 
   </div>
@@ -1374,39 +1319,12 @@
       </div>
 
       <div class="section-label" style="margin-bottom:16px;">Shows populares ahora</div>
-      <div class="popular-grid">
-        <div class="popular-card" onclick="showDetail(null)">
-          <div class="popular-card-icon" style="background:linear-gradient(135deg,#e8ff47,#b5cc1a);">TS</div>
-          <div class="popular-card-info">
-            <div class="popular-card-artist">Taylor Swift</div>
-            <div class="popular-card-show">The Eras Tour · BsAs N2</div>
-            <div class="popular-card-meta">18 Nov 2023 · 3.984 logs</div>
-          </div>
-        </div>
-        <div class="popular-card" onclick="showDetail(null)">
-          <div class="popular-card-icon" style="background:linear-gradient(135deg,#60a5fa,#1d4ed8);">RH</div>
-          <div class="popular-card-info">
-            <div class="popular-card-artist">Radiohead</div>
-            <div class="popular-card-show">In Rainbows Tour · Glastonbury</div>
-            <div class="popular-card-meta">27 Jun 2008 · 1.201 logs</div>
-          </div>
-        </div>
-        <div class="popular-card" onclick="showDetail(null)">
-          <div class="popular-card-icon" style="background:linear-gradient(135deg,#f472b6,#9333ea);">SS</div>
-          <div class="popular-card-info">
-            <div class="popular-card-artist">Soda Stereo</div>
-            <div class="popular-card-show">Me Verás Volver · River Plate</div>
-            <div class="popular-card-meta">19 Oct 2007 · 892 logs</div>
-          </div>
-        </div>
-        <div class="popular-card" onclick="showDetail(null)">
-          <div class="popular-card-icon" style="background:linear-gradient(135deg,#34d399,#059669);">AM</div>
-          <div class="popular-card-info">
-            <div class="popular-card-artist">Arctic Monkeys</div>
-            <div class="popular-card-show">The Car Tour · Lollapalooza ARG</div>
-            <div class="popular-card-meta">18 Mar 2023 · 654 logs</div>
-          </div>
-        </div>
+      <div class="popular-grid" id="popularGrid">
+        <!-- skeleton while loading -->
+        <div class="skeleton" style="height:76px;border-radius:12px;"></div>
+        <div class="skeleton" style="height:76px;border-radius:12px;animation-delay:.08s"></div>
+        <div class="skeleton" style="height:76px;border-radius:12px;animation-delay:.16s"></div>
+        <div class="skeleton" style="height:76px;border-radius:12px;animation-delay:.24s"></div>
       </div>
     </div>
 
@@ -1597,12 +1515,146 @@
     }).join("");
   }
 
+  // ── REVIEWS dinámicas ──────────────────────────────────────────
+  let inlineRating = 0;
+
+  function setRating(n) {
+    inlineRating = n;
+    document.querySelectorAll("#ratingInput .star-btn").forEach((s, i) =>
+      s.style.color = i < n ? "var(--star-active)" : "");
+  }
+
+  async function loadReviews(setlistfm_id) {
+    const list = document.getElementById("reviewsList");
+    const label = document.getElementById("reviewsLabel");
+    const writeCard = document.getElementById("writeReviewCard");
+    list.innerHTML = "<div style='padding:24px 0;text-align:center;color:var(--text-muted);font-size:13px;'>Cargando reseñas…</div>";
+
+    // Mostrar write card solo si hay sesión
+    if (session) {
+      writeCard.style.display = "";
+      const dateEl = document.getElementById("inlineReviewDate");
+      if (currentSetlist?.eventDate) {
+        dateEl.innerHTML = `<svg width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg> ${formatDate(currentSetlist.eventDate)}`;
+      }
+    } else {
+      writeCard.style.display = "none";
+    }
+
+    try {
+      const res = await fetch("/api/reviews/concert/" + encodeURIComponent(setlistfm_id));
+      const reviews = await res.json();
+      label.textContent = "Reseñas" + (reviews.length ? " · " + reviews.length + " en total" : "");
+      if (!reviews.length) {
+        list.innerHTML = "<div style='padding:32px 0;text-align:center;color:var(--text-muted);font-size:14px;'>Todavía no hay reseñas.<br><span style='font-size:12px;'>¡Sé el primero en loggear este show!</span></div>";
+        return;
+      }
+      list.innerHTML = reviews.map(r => {
+        const username = r.profiles?.username || "usuario";
+        const initl = username.slice(0, 2).toUpperCase();
+        const color = colorFor(username);
+        const stars = "★".repeat(r.rating || 0) + "<span class='star-empty'>" + "★".repeat(5 - (r.rating || 0)) + "</span>";
+        const date = new Date(r.created_at).toLocaleDateString("es-AR", { day: "numeric", month: "short", year: "numeric" });
+        const bodyHtml = r.body ? `<div class="review-text">${r.body}</div>` : "";
+        return `<div class="review-card">
+          <div class="review-header">
+            <div class="reviewer-avatar" style="background:linear-gradient(135deg,${color});">${initl}</div>
+            <div class="reviewer-info">
+              <div class="reviewer-name">${username}</div>
+              <div class="review-date">${date}</div>
+            </div>
+            <div class="review-stars">${stars}</div>
+          </div>
+          ${bodyHtml}
+        </div>`;
+      }).join("");
+    } catch (e) {
+      list.innerHTML = "<div style='padding:24px 0;text-align:center;color:var(--text-muted);font-size:13px;'>No se pudieron cargar las reseñas.</div>";
+    }
+  }
+
+  async function saveInlineReview() {
+    if (!session) { openAuthModal("login"); return; }
+    if (!currentSetlist) return;
+    const body = document.getElementById("inlineReviewText").value || "";
+    const btn = document.querySelector("#writeReviewCard .btn-primary");
+    btn.textContent = "Guardando..."; btn.disabled = true;
+    const s = currentSetlist;
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + session.token },
+        body: JSON.stringify({
+          setlistfm_id: s.id, artist_name: s.artist?.name, venue_name: s.venue?.name,
+          city: s.venue?.city?.name, country: s.venue?.city?.country?.name,
+          event_date: s.eventDate ? s.eventDate.split("-").reverse().join("-") : null,
+          tour_name: s.tour?.name, song_count: countSongs(s), setlist_data: s,
+          rating: inlineRating || null, body
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      btn.textContent = "✓ Publicada";
+      document.getElementById("inlineReviewText").value = "";
+      inlineRating = 0;
+      document.querySelectorAll("#ratingInput .star-btn").forEach(s => s.style.color = "");
+      setTimeout(() => { btn.textContent = "Publicar reseña"; btn.disabled = false; }, 1500);
+      loadReviews(s.id); // Refresh
+    } catch (err) {
+      btn.textContent = "Error — intentá de nuevo";
+      setTimeout(() => { btn.textContent = "Publicar reseña"; btn.disabled = false; }, 2000);
+    }
+  }
+
+  // ── SHOWS POPULARES dinámicos ───────────────────────────────────
+  let popularLoaded = false;
+
+  async function loadPopular() {
+    if (popularLoaded) return;
+    const grid = document.getElementById("popularGrid");
+    try {
+      const res = await fetch("/api/popular");
+      const concerts = await res.json();
+      if (!concerts.length) { grid.innerHTML = ""; return; }
+      grid.innerHTML = concerts.map(c => {
+        const color = colorFor(c.artist_name);
+        const initl = initials(c.artist_name);
+        const meta = [c.event_date, c.review_count ? c.review_count + " logs" : null].filter(Boolean).join(" · ");
+        const show = [c.venue_name, c.tour_name ? c.tour_name : null].filter(Boolean).join(" · ").slice(0, 38);
+        return `<div class="popular-card" onclick='loadAndShowDetail(${JSON.stringify(c.setlistfm_id)})'>
+          <div class="popular-card-icon" style="background:linear-gradient(135deg,${color});">${initl}</div>
+          <div class="popular-card-info">
+            <div class="popular-card-artist">${c.artist_name}</div>
+            <div class="popular-card-show">${show || "—"}</div>
+            <div class="popular-card-meta">${meta}</div>
+          </div>
+        </div>`;
+      }).join("");
+      popularLoaded = true;
+    } catch (e) {
+      grid.innerHTML = "";
+    }
+  }
+
+  async function loadAndShowDetail(setlistfm_id) {
+    // Fetch the setlist from setlist.fm and show detail
+    try {
+      const res = await fetch("/api/setlist/" + setlistfm_id);
+      if (!res.ok) throw new Error("Error cargando show");
+      const setlist = await res.json();
+      showDetail(setlist);
+    } catch (e) {
+      alert("No se pudo cargar el show.");
+    }
+  }
+
   function showSearch(){
     document.getElementById("searchScreen").classList.add("active");
     document.querySelector(".hero").style.display="none";
     document.querySelector(".main").style.display="none";
     document.getElementById("coleccionScreen").style.display="none";
     document.getElementById("nav-explorar").style.color="var(--accent)";
+    loadPopular();
   }
 
   function showDetail(setlist){
@@ -1625,9 +1677,31 @@
     if(metaPills[0]) metaPills[0].innerHTML="<svg fill=currentColor viewBox='0 0 16 16' style='width:12px;height:12px'><path d='M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A31.493 31.493 0 0 1 8 14.58a31.481 31.481 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94zM8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10z'/><path d='M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'/></svg> "+venue+", "+city;
     const sv=document.querySelectorAll(".stat-val");
     if(sv[0])sv[0].textContent=songs; if(sv[1])sv[1].textContent="—"; if(sv[2])sv[2].textContent="—";
+    const metaRvPill = document.getElementById("metaReviewCount");
+    if(metaRvPill) metaRvPill.style.display="none";
     document.querySelector(".hero-img-fake").style.background="linear-gradient(135deg, "+color.split(",")[0]+"22, "+color.split(",")[1]+"18, rgba(20,20,30,0.9))";
     document.getElementById("logModalSub").textContent=artist+" · "+venue+" · "+date;
     renderSetlist(setlist);
+    // Cargar reseñas reales y actualizar stats
+    loadReviews(setlist.id).then(async () => {
+      // Actualizar rating promedio y total de reviews en stats
+      try {
+        const res = await fetch("/api/reviews/concert/" + encodeURIComponent(setlist.id));
+        const reviews = await res.json();
+        if (reviews.length) {
+          const withRating = reviews.filter(r => r.rating);
+          const avg = withRating.length ? (withRating.reduce((a,r) => a + r.rating, 0) / withRating.length).toFixed(1) : "—";
+          if(sv[1]) sv[1].textContent = reviews.length;
+          if(sv[2]) sv[2].textContent = avg !== "—" ? avg : "—";
+          const pill = document.getElementById("metaReviewCount");
+          const pillText = document.getElementById("metaReviewCountText");
+          if (pill && pillText) {
+            pillText.textContent = reviews.length + (reviews.length === 1 ? " reseña" : " reseñas");
+            pill.style.display = "";
+          }
+        }
+      } catch(e) {}
+    });
     document.querySelector(".hero").style.display="";
     document.querySelector(".main").style.display="";
     clearSearch();

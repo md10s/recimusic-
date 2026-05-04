@@ -171,6 +171,55 @@ app.post('/api/reviews', async (req, res) => {
   res.json({ ok: true, review: Array.isArray(reviewData) ? reviewData[0] : reviewData });
 });
 
+// GET /api/reviews/concert/:setlistfm_id  — reseñas públicas de un show
+app.get('/api/reviews/concert/:setlistfm_id', async (req, res) => {
+  const { setlistfm_id } = req.params;
+
+  // Buscar el concert
+  const concertRes = await sbFetch(
+    `/concerts?setlistfm_id=eq.${encodeURIComponent(setlistfm_id)}&select=id`
+  );
+  if (!concertRes.ok || !concertRes.data?.length) return res.json([]);
+  const concertId = concertRes.data[0].id;
+
+  // Traer reseñas con profile (username)
+  const result = await sbFetch(
+    `/reviews?concert_id=eq.${concertId}&select=*,profiles(username)&order=created_at.desc&limit=20`
+  );
+  res.json(result.data || []);
+});
+
+// GET /api/popular — concerts con más reseñas
+app.get('/api/popular', async (req, res) => {
+  // Traer los 20 concerts más recientes que tengan al menos una reseña
+  try {
+    const result = await sbFetch(
+      `/concerts?select=*,reviews(count)&order=created_at.desc&limit=20`
+    );
+    if (!result.ok) return res.status(500).json({ error: 'Error al obtener populares.' });
+
+    // Filtrar los que tengan al menos 1 reseña y ordenar por cantidad
+    const concerts = (result.data || [])
+      .filter(c => c.reviews?.[0]?.count > 0)
+      .sort((a, b) => (b.reviews?.[0]?.count || 0) - (a.reviews?.[0]?.count || 0))
+      .slice(0, 6)
+      .map(c => ({ ...c, review_count: c.reviews?.[0]?.count || 0 }));
+
+    // Si no hay suficientes con reseñas, completar con recientes
+    if (concerts.length < 4) {
+      const recent = (result.data || [])
+        .filter(c => !concerts.find(x => x.id === c.id))
+        .slice(0, 6 - concerts.length)
+        .map(c => ({ ...c, review_count: 0 }));
+      concerts.push(...recent);
+    }
+
+    res.json(concerts);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/reviews/me
 app.get('/api/reviews/me', async (req, res) => {
   const token = req.headers.authorization?.replace('Bearer ', '');
