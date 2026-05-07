@@ -1023,6 +1023,88 @@
   }
 
   /* ── AMIGOS ── */
+  .stats-big-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+  }
+  .stats-big-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stats-big-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .stats-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+  .stats-bar-label {
+    width: 42px;
+    color: var(--text-muted);
+    text-align: right;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .stats-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .stats-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+    transition: width .6s ease;
+  }
+  .stats-bar-count {
+    width: 28px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .stats-artist-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .stats-city-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .stats-city-count {
+    background: rgba(232,255,71,0.12);
+    color: var(--accent);
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
   .amigos-tab {
     flex: 1; padding: 8px; border: none; border-radius: 7px;
     font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
@@ -1194,7 +1276,8 @@
   <ul class="nav-links">
     <li onclick="showSearch()" id="nav-explorar" style="color:var(--accent)">Explorar</li>
     <li onclick="requireAuth(showColeccion)">Mi Colección</li>
-    <li onclick="showAmigos()">Amigos</li>
+    <li onclick="requireAuth(showAmigos)" id="nav-amigos">Amigos</li>
+    <li onclick="requireAuth(showEstadisticas)" id="nav-stats">Estadísticas</li>
     <li>Estadísticas</li>
   </ul>
   <div id="navAuth"></div>
@@ -1218,7 +1301,8 @@
 <ul class="nav-mobile-menu" id="mobileMenu">
   <li onclick="closeMobileMenu();showSearch()" style="color:var(--accent)">Explorar</li>
   <li onclick="closeMobileMenu();requireAuth(showColeccion)">Mi Colección</li>
-  <li onclick="closeMobileMenu();showAmigos()">Amigos</li>
+  <li onclick="closeMobileMenu();requireAuth(showAmigos)">Amigos</li>
+  <li onclick="closeMobileMenu();requireAuth(showEstadisticas)">Estadísticas</li>
   <li>Estadísticas</li>
   <div class="nav-mobile-auth" id="mobileAuth"></div>
 </ul>
@@ -1646,6 +1730,46 @@
   </div>
 </div>
 
+<!-- ESTADÍSTICAS SCREEN -->
+<div id="statsScreen" style="display:none; position:fixed; inset:0; z-index:90; background:var(--bg); overflow-y:auto; padding-top:60px;">
+  <div style="max-width:860px; margin:0 auto; padding:48px 32px;">
+    <div style="font-size:11px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px;">Tu actividad</div>
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:2px; margin-bottom:40px;">Estadísticas</div>
+
+    <!-- Big numbers -->
+    <div id="statsBigNumbers" style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:40px;">
+      <div class="stats-big-card" id="statTotalShows">
+        <div class="stats-big-val">—</div>
+        <div class="stats-big-label">Shows totales</div>
+      </div>
+      <div class="stats-big-card" id="statArtists">
+        <div class="stats-big-val">—</div>
+        <div class="stats-big-label">Artistas distintos</div>
+      </div>
+      <div class="stats-big-card" id="statAvgRating">
+        <div class="stats-big-val">—</div>
+        <div class="stats-big-label">Rating promedio</div>
+      </div>
+    </div>
+
+    <!-- Shows por año -->
+    <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; display:flex; align-items:center; gap:12px;">Shows por año <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
+    <div id="statsYearChart" style="margin-bottom:40px; display:flex; flex-direction:column; gap:10px;"></div>
+
+    <!-- Artistas más vistos -->
+    <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; display:flex; align-items:center; gap:12px;">Artistas más vistos <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
+    <div id="statsTopArtists" style="margin-bottom:40px; display:flex; flex-direction:column; gap:8px;"></div>
+
+    <!-- Ciudades -->
+    <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; display:flex; align-items:center; gap:12px;">Ciudades <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
+    <div id="statsTopCities" style="margin-bottom:40px; display:flex; flex-wrap:wrap; gap:10px;"></div>
+
+    <!-- Mejor rated -->
+    <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; display:flex; align-items:center; gap:12px;">Tus 5 estrellas <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
+    <div id="statsFiveStars" style="display:flex; flex-direction:column; gap:8px;"></div>
+  </div>
+</div>
+
 <!-- LOG MODAL -->
 <div id="logModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:200; align-items:center; justify-content:center;">
   <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; width:480px; max-width:90vw; animation: slideUp .3s ease both;">
@@ -1756,7 +1880,7 @@
     document.getElementById("searchScreen").classList.remove("active");
     document.querySelector(".hero").style.display="none";
     document.querySelector(".main").style.display="none";
-    document.getElementById("amigosScreen").style.display="none";
+    document.getElementById("amigosScreen").style.display="none"; document.getElementById("statsScreen").style.display="none";
     document.getElementById("coleccionScreen").style.display="block";
     document.getElementById("colUsername").textContent=session.username;
     const res=await fetch("/api/reviews/me",{headers:{"Authorization":"Bearer "+session.token}});
@@ -1909,7 +2033,7 @@
     document.querySelector(".hero").style.display="none";
     document.querySelector(".main").style.display="none";
     document.getElementById("coleccionScreen").style.display="none";
-    document.getElementById("amigosScreen").style.display="none";
+    document.getElementById("amigosScreen").style.display="none"; document.getElementById("statsScreen").style.display="none";
     document.getElementById("nav-explorar").style.color="var(--accent)";
     loadPopular();
   }
@@ -2096,6 +2220,108 @@
   // ── AMIGOS ──────────────────────────────────────────────────────
   let amigosTab = 'feed';
   let amigosData = { following: [], followers: [] };
+
+  function showEstadisticas() {
+    if (!session) { openAuthModal('login'); return; }
+    document.getElementById('searchScreen').classList.remove('active');
+    document.querySelector('.hero').style.display = 'none';
+    document.querySelector('.main').style.display = 'none';
+    document.getElementById('coleccionScreen').style.display = 'none';
+    document.getElementById('amigosScreen').style.display = 'none'; document.getElementById('statsScreen').style.display = 'none';
+    document.getElementById('statsScreen').style.display = 'block';
+    document.getElementById('nav-explorar').style.color = '';
+    closeMobileMenu();
+    loadEstadisticas();
+  }
+
+  async function loadEstadisticas() {
+    // Traer todas las reviews del usuario
+    const res = await fetch('/api/reviews/me', { headers: { 'Authorization': 'Bearer ' + session.token } });
+    const reviews = await res.json();
+
+    if (!reviews.length) {
+      ['statsYearChart','statsTopArtists','statsTopCities','statsFiveStars'].forEach(id => {
+        document.getElementById(id).innerHTML = "<div style='color:var(--text-muted);font-size:14px;padding:16px 0;'>Todavía no loggeaste ningún show.</div>";
+      });
+      document.querySelector('#statTotalShows .stats-big-val').textContent = '0';
+      document.querySelector('#statArtists .stats-big-val').textContent = '0';
+      document.querySelector('#statAvgRating .stats-big-val').textContent = '—';
+      return;
+    }
+
+    // Big numbers
+    const artists = new Set(reviews.map(r => r.concerts?.artist_name).filter(Boolean));
+    const ratings = reviews.filter(r => r.rating).map(r => r.rating);
+    const avg = ratings.length ? (ratings.reduce((a,b) => a+b, 0) / ratings.length).toFixed(1) : '—';
+    document.querySelector('#statTotalShows .stats-big-val').textContent = reviews.length;
+    document.querySelector('#statArtists .stats-big-val').textContent = artists.size;
+    document.querySelector('#statAvgRating .stats-big-val').textContent = avg;
+
+    // Shows por año
+    const byYear = {};
+    reviews.forEach(r => {
+      const date = r.concerts?.event_date || '';
+      const year = date.match(/\d{4}/)?.[0];
+      if (year) byYear[year] = (byYear[year] || 0) + 1;
+    });
+    const maxYear = Math.max(...Object.values(byYear), 1);
+    const yearsSorted = Object.keys(byYear).sort((a,b) => b - a);
+    document.getElementById('statsYearChart').innerHTML = yearsSorted.map(y => `
+      <div class="stats-bar-row">
+        <div class="stats-bar-label">${y}</div>
+        <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${Math.round(byYear[y]/maxYear*100)}%"></div></div>
+        <div class="stats-bar-count">${byYear[y]}</div>
+      </div>`).join('') || '<div style="color:var(--text-muted);font-size:13px;">Sin datos de año.</div>';
+
+    // Top artistas
+    const byArtist = {};
+    reviews.forEach(r => {
+      const a = r.concerts?.artist_name;
+      if (a) byArtist[a] = (byArtist[a] || 0) + 1;
+    });
+    const topArtists = Object.entries(byArtist).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    const maxA = topArtists[0]?.[1] || 1;
+    document.getElementById('statsTopArtists').innerHTML = topArtists.map(([name, count]) => {
+      const color = colorFor(name);
+      return `<div class="stats-artist-row">
+        <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,${color});display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;flex-shrink:0;">${initials(name)}</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:500;margin-bottom:4px;">${name}</div>
+          <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${Math.round(count/maxA*100)}%"></div></div>
+        </div>
+        <div style="font-size:13px;color:var(--text-muted);font-weight:600;">${count} show${count>1?'s':''}</div>
+      </div>`;
+    }).join('') || '<div style="color:var(--text-muted);font-size:13px;">Sin datos.</div>';
+
+    // Ciudades
+    const byCity = {};
+    reviews.forEach(r => {
+      const city = r.concerts?.city;
+      if (city) byCity[city] = (byCity[city] || 0) + 1;
+    });
+    const topCities = Object.entries(byCity).sort((a,b) => b[1]-a[1]).slice(0, 10);
+    document.getElementById('statsTopCities').innerHTML = topCities.map(([city, count]) =>
+      `<div class="stats-city-chip">📍 ${city} <span class="stats-city-count">${count}</span></div>`
+    ).join('') || '<div style="color:var(--text-muted);font-size:13px;">Sin datos.</div>';
+
+    // 5 estrellas
+    const fiveStars = reviews.filter(r => r.rating === 5);
+    document.getElementById('statsFiveStars').innerHTML = fiveStars.length
+      ? fiveStars.map(r => {
+          const c = r.concerts;
+          const color = colorFor(c?.artist_name || '');
+          return `<div class="concert-result-card" style="cursor:pointer;" onclick='loadAndShowDetail(${JSON.stringify(c?.setlistfm_id)})'>
+            <div class="card-thumb" style="background:linear-gradient(135deg,${color});">${initials(c?.artist_name||'')}</div>
+            <div class="card-main">
+              <div class="card-artist">${c?.artist_name||'—'}</div>
+              <div class="card-title">${c?.venue_name||'—'}${c?.tour_name?' · '+c.tour_name:''}</div>
+              <div class="card-meta"><div class="card-meta-item">📍 ${c?.city||'—'}</div><div class="card-meta-item">📅 ${c?.event_date||'—'}</div></div>
+            </div>
+            <div class="card-right" style="color:var(--star-active);font-size:18px;">★★★★★</div>
+          </div>`;
+        }).join('')
+      : '<div style="color:var(--text-muted);font-size:14px;padding:16px 0;">Todavía no pusiste ningún 5 estrellas.</div>';
+  }
 
   function showAmigos() {
     if (!session) { openAuthModal('login'); return; }
