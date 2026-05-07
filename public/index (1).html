@@ -1472,14 +1472,16 @@
     </div>
 
     <div class="search-filters">
-      <div class="filter-chip active" onclick="toggleFilter(this)">Todos los géneros</div>
-      <div class="filter-chip" onclick="toggleFilter(this)">Rock</div>
-      <div class="filter-chip" onclick="toggleFilter(this)">Pop</div>
-      <div class="filter-chip" onclick="toggleFilter(this)">Electronic</div>
-      <div class="filter-chip" onclick="toggleFilter(this)">Hip-Hop</div>
-      <div class="filter-chip" onclick="toggleFilter(this)">Argentina 🇦🇷</div>
-      <div class="filter-chip" onclick="toggleFilter(this)">2024</div>
-      <div class="filter-chip" onclick="toggleFilter(this)">2023</div>
+      <div class="filter-chip active" onclick="toggleFilter(this, '')">Todos los géneros</div>
+      <div class="filter-chip" onclick="toggleFilter(this, 'Rock')">Rock</div>
+      <div class="filter-chip" onclick="toggleFilter(this, 'Pop')">Pop</div>
+      <div class="filter-chip" onclick="toggleFilter(this, 'Electronic')">Electronic</div>
+      <div class="filter-chip" onclick="toggleFilter(this, 'Hip-Hop')">Hip-Hop</div>
+      <div class="filter-chip" onclick="toggleFilter(this, 'Argentina')">Argentina 🇦🇷</div>
+      <div class="filter-chip" onclick="toggleFilter(this, '2026')">2026</div>
+      <div class="filter-chip" onclick="toggleFilter(this, '2025')">2025</div>
+      <div class="filter-chip" onclick="toggleFilter(this, '2024')">2024</div>
+      <div class="filter-chip" onclick="toggleFilter(this, '2023')">2023</div>
     </div>
   </div>
 
@@ -2046,7 +2048,41 @@
   function setLoadingState(){document.getElementById("searchInitial").style.display="none";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.add("visible");}
   function showInitial(){document.getElementById("searchInitial").style.display="";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.remove("visible");}
   function showError(msg){document.getElementById("searchLoading").classList.remove("visible");document.querySelector("#searchEmpty .empty-icon").textContent="⚠️";document.querySelector("#searchEmpty .empty-title").textContent=msg;document.querySelector("#searchEmpty .empty-sub").textContent="Verifica que el servidor este corriendo.";document.getElementById("searchEmpty").classList.add("visible");}
-  function toggleFilter(el){document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));el.classList.add("active");}
+  function toggleFilter(el, query){
+    document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+    el.classList.add("active");
+    const f = document.getElementById("searchField");
+    const current = f ? f.value.trim() : "";
+    if(!query) {
+      // "Todos" — limpiar año del campo pero mantener artista
+      if(f) f.value = current.replace(/\s*\d{4}$/, "").trim();
+      const clean = f ? f.value.trim() : "";
+      if(clean) handleSearch(clean);
+      else { const res = document.getElementById("searchResults"); if(res) res.innerHTML = ""; }
+      return;
+    }
+    const isYear = /^\d{4}$/.test(query);
+    if(isYear) {
+      // Sacar año anterior si había, agregar el nuevo
+      const artistOnly = current.replace(/\s*\d{4}$/, "").trim();
+      if(!artistOnly) {
+        // Sin artista — mostrar mensaje
+        const res = document.getElementById("searchResults");
+        if(res) res.innerHTML = "<div style='padding:40px 0;text-align:center;color:var(--text-muted);font-size:14px;'>Escribí un artista y luego filtrá por año 🎸</div>";
+        if(f) f.value = query;
+        return;
+      }
+      const combined = artistOnly + " " + query;
+      if(f) f.value = combined;
+      handleSearch(combined);
+    } else {
+      // Es género/país — combinar con año activo si hay
+      const yearMatch = current.match(/\d{4}$/);
+      const combined = query + (yearMatch ? " " + yearMatch[0] : "");
+      if(f) f.value = combined;
+      handleSearch(combined);
+    }
+  }
 
   function setModalRating(n){modalRating=n;document.querySelectorAll("#modalStars .star-btn").forEach((s,i)=>s.style.color=i<n?"var(--star-active)":"");}
   document.querySelectorAll(".star-btn").forEach(btn=>{
