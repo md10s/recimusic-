@@ -667,6 +667,42 @@
   }
   .search-screen.active { display: block; }
 
+  /* ── FOOTER ── */
+  .site-footer {
+    margin-top: 60px;
+    border-top: 1px solid var(--border);
+    padding: 40px 48px 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: space-between;
+  }
+  .footer-brand { max-width: 260px; }
+  .footer-brand .footer-logo { display: block; margin-bottom: 10px; }
+  .footer-tagline { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+  .footer-col-title { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+  .footer-links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .footer-links li { font-size: 13px; color: var(--text); cursor: pointer; opacity: 0.85; transition: opacity .15s; width: fit-content; }
+  .footer-links li:hover { opacity: 1; color: var(--accent); }
+  .footer-contact a { font-size: 13px; color: var(--text); text-decoration: none; opacity: 0.85; }
+  .footer-contact a:hover { opacity: 1; color: var(--accent); }
+  .footer-social { display: flex; gap: 10px; margin-top: 14px; }
+  .footer-social a {
+    width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; color: var(--text-muted);
+    transition: all .15s;
+  }
+  .footer-social a:hover { color: var(--accent); border-color: var(--accent); }
+  .footer-bottom {
+    max-width: 1400px; margin: 0 auto; padding: 18px 48px 32px;
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between;
+    font-size: 11.5px; color: var(--text-dim);
+  }
+  @media (max-width: 700px) {
+    .site-footer { padding: 32px 20px 20px; gap: 28px; }
+    .footer-bottom { padding: 14px 20px 24px; }
+  }
+
   .search-hero {
     padding: 48px 48px 32px;
     max-width: 860px;
@@ -1269,10 +1305,10 @@
 
 <!-- NAV -->
 <nav>
-  <svg width="110" height="28" viewBox="0 0 110 28" style="display:block;cursor:pointer;" onclick="showSearch()">
-    <text x="2" y="23" font-family="'Arial Black', Impact, sans-serif" font-size="26" font-weight="900" letter-spacing="3"
+  <svg width="130" height="32" viewBox="0 0 130 32" style="display:block;cursor:pointer;" onclick="showSearch()">
+    <text x="2" y="25" font-family="'Arial Black', Impact, sans-serif" font-size="26" font-weight="900" letter-spacing="3"
       fill="none" stroke="#e8ff47" stroke-width="1.5">COPLA</text>
-    <circle cx="55" cy="27" r="2.5" fill="#ff6b35"/>
+    <circle cx="112" cy="28" r="2.5" fill="#ff6b35"/>
   </svg>
   <ul class="nav-links">
     <li onclick="showSearch()" id="nav-explorar" style="color:var(--accent)">Explorar</li>
@@ -1525,14 +1561,51 @@
       <!-- Venue -->
       <div class="sidebar-card venue-info">
         <div class="section-label" style="margin-bottom:14px;">Venue</div>
-        <div class="venue-name">Estadio Monumental</div>
-        <p>Av. Figueroa Alcorta 7597<br>Buenos Aires, Argentina<br>Cap. 84.000 personas</p>
-        <div style="margin-top:14px; height:100px; background:var(--surface2); border-radius:8px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-dim); font-size:12px; letter-spacing:1px; text-transform:uppercase;">Mapa del venue</div>
+        <div class="venue-name" id="venueName">—</div>
+        <p id="venueAddress">—</p>
+        <a id="venueMapLink" href="#" target="_blank" rel="noopener" style="display:flex; margin-top:14px; height:100px; background:var(--surface2); border-radius:8px; border:1px solid var(--border); align-items:center; justify-content:center; color:var(--text-dim); font-size:12px; letter-spacing:1px; text-transform:uppercase; text-decoration:none;">Ver en Google Maps</a>
       </div>
 
     </div>
   </div>
 </div>
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <svg class="footer-logo" width="110" height="27" viewBox="0 0 130 32">
+          <text x="2" y="25" font-family="'Arial Black', Impact, sans-serif" font-size="26" font-weight="900" letter-spacing="3" fill="none" stroke="#e8ff47" stroke-width="1.5">COPLA</text>
+          <circle cx="112" cy="28" r="2.5" fill="#ff6b35"/>
+        </svg>
+        <p class="footer-tagline">Registrá, reseñá y coleccioná los recitales a los que fuiste. Setlists reales, memoria real.</p>
+        <div class="footer-social">
+          <a class="footer-link-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a class="footer-link-x" href="#" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.7L4.4 22H1.3l8.2-9.3L1 2h7.1l4.9 6.1L18.9 2zm-1.2 18h1.9L7.4 4H5.4l12.3 16z"/></svg>
+          </a>
+          <a class="footer-link-tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 2c.3 2 1.7 3.6 3.7 4v3c-1.4 0-2.7-.4-3.7-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 1 0 1.8 2.5V2h3z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li onclick="showSearch()">Explorar</li>
+          <li onclick="requireAuth(showColeccion)">Mi Colección</li>
+          <li onclick="requireAuth(showAmigos)">Amigos</li>
+          <li onclick="requireAuth(showEstadisticas)">Estadísticas</li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-col-title">Contacto</div>
+        <a href="mailto:hola@coplar.com.ar">hola@coplar.com.ar</a>
+      </div>
+    </footer>
+    <div class="footer-bottom">
+      <span>© <span class="footer-year"></span> COPLA. Hecho con ♥ en Argentina.</span>
+      <span>Datos de setlists por Setlist.fm</span>
+    </div>
 
 <!-- SEARCH SCREEN -->
 <div id="searchScreen" class="search-screen active">
@@ -1641,6 +1714,43 @@
     </div>
 
   </div>
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <svg class="footer-logo" width="110" height="27" viewBox="0 0 130 32">
+          <text x="2" y="25" font-family="'Arial Black', Impact, sans-serif" font-size="26" font-weight="900" letter-spacing="3" fill="none" stroke="#e8ff47" stroke-width="1.5">COPLA</text>
+          <circle cx="112" cy="28" r="2.5" fill="#ff6b35"/>
+        </svg>
+        <p class="footer-tagline">Registrá, reseñá y coleccioná los recitales a los que fuiste. Setlists reales, memoria real.</p>
+        <div class="footer-social">
+          <a class="footer-link-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a class="footer-link-x" href="#" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.7L4.4 22H1.3l8.2-9.3L1 2h7.1l4.9 6.1L18.9 2zm-1.2 18h1.9L7.4 4H5.4l12.3 16z"/></svg>
+          </a>
+          <a class="footer-link-tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 2c.3 2 1.7 3.6 3.7 4v3c-1.4 0-2.7-.4-3.7-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 1 0 1.8 2.5V2h3z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li onclick="showSearch()">Explorar</li>
+          <li onclick="requireAuth(showColeccion)">Mi Colección</li>
+          <li onclick="requireAuth(showAmigos)">Amigos</li>
+          <li onclick="requireAuth(showEstadisticas)">Estadísticas</li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-col-title">Contacto</div>
+        <a href="mailto:hola@coplar.com.ar">hola@coplar.com.ar</a>
+      </div>
+    </footer>
+    <div class="footer-bottom">
+      <span>© <span class="footer-year"></span> COPLA. Hecho con ♥ en Argentina.</span>
+      <span>Datos de setlists por Setlist.fm</span>
+    </div>
 </div>
 
 <!-- AUTH MODAL -->
@@ -1691,6 +1801,43 @@
       <div style="text-align:center; padding:48px; color:var(--text-muted); font-size:14px;">Cargando tus shows…</div>
     </div>
   </div>
+      <footer class="site-footer">
+      <div class="footer-brand">
+        <svg class="footer-logo" width="110" height="27" viewBox="0 0 130 32">
+          <text x="2" y="25" font-family="'Arial Black', Impact, sans-serif" font-size="26" font-weight="900" letter-spacing="3" fill="none" stroke="#e8ff47" stroke-width="1.5">COPLA</text>
+          <circle cx="112" cy="28" r="2.5" fill="#ff6b35"/>
+        </svg>
+        <p class="footer-tagline">Registrá, reseñá y coleccioná los recitales a los que fuiste. Setlists reales, memoria real.</p>
+        <div class="footer-social">
+          <a class="footer-link-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a class="footer-link-x" href="#" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.7L4.4 22H1.3l8.2-9.3L1 2h7.1l4.9 6.1L18.9 2zm-1.2 18h1.9L7.4 4H5.4l12.3 16z"/></svg>
+          </a>
+          <a class="footer-link-tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 2c.3 2 1.7 3.6 3.7 4v3c-1.4 0-2.7-.4-3.7-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 1 0 1.8 2.5V2h3z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li onclick="showSearch()">Explorar</li>
+          <li onclick="requireAuth(showColeccion)">Mi Colección</li>
+          <li onclick="requireAuth(showAmigos)">Amigos</li>
+          <li onclick="requireAuth(showEstadisticas)">Estadísticas</li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-col-title">Contacto</div>
+        <a href="mailto:hola@coplar.com.ar">hola@coplar.com.ar</a>
+      </div>
+    </footer>
+    <div class="footer-bottom">
+      <span>© <span class="footer-year"></span> COPLA. Hecho con ♥ en Argentina.</span>
+      <span>Datos de setlists por Setlist.fm</span>
+    </div>
 </div>
 
 <!-- AMIGOS SCREEN -->
@@ -1725,6 +1872,43 @@
     </div>
 
   </div>
+      <footer class="site-footer">
+      <div class="footer-brand">
+        <svg class="footer-logo" width="110" height="27" viewBox="0 0 130 32">
+          <text x="2" y="25" font-family="'Arial Black', Impact, sans-serif" font-size="26" font-weight="900" letter-spacing="3" fill="none" stroke="#e8ff47" stroke-width="1.5">COPLA</text>
+          <circle cx="112" cy="28" r="2.5" fill="#ff6b35"/>
+        </svg>
+        <p class="footer-tagline">Registrá, reseñá y coleccioná los recitales a los que fuiste. Setlists reales, memoria real.</p>
+        <div class="footer-social">
+          <a class="footer-link-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a class="footer-link-x" href="#" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.7L4.4 22H1.3l8.2-9.3L1 2h7.1l4.9 6.1L18.9 2zm-1.2 18h1.9L7.4 4H5.4l12.3 16z"/></svg>
+          </a>
+          <a class="footer-link-tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 2c.3 2 1.7 3.6 3.7 4v3c-1.4 0-2.7-.4-3.7-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 1 0 1.8 2.5V2h3z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li onclick="showSearch()">Explorar</li>
+          <li onclick="requireAuth(showColeccion)">Mi Colección</li>
+          <li onclick="requireAuth(showAmigos)">Amigos</li>
+          <li onclick="requireAuth(showEstadisticas)">Estadísticas</li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-col-title">Contacto</div>
+        <a href="mailto:hola@coplar.com.ar">hola@coplar.com.ar</a>
+      </div>
+    </footer>
+    <div class="footer-bottom">
+      <span>© <span class="footer-year"></span> COPLA. Hecho con ♥ en Argentina.</span>
+      <span>Datos de setlists por Setlist.fm</span>
+    </div>
 </div>
 
 <!-- ESTADÍSTICAS SCREEN -->
@@ -1765,6 +1949,43 @@
     <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; display:flex; align-items:center; gap:12px;">Tus 5 estrellas <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
     <div id="statsFiveStars" style="display:flex; flex-direction:column; gap:8px;"></div>
   </div>
+      <footer class="site-footer">
+      <div class="footer-brand">
+        <svg class="footer-logo" width="110" height="27" viewBox="0 0 130 32">
+          <text x="2" y="25" font-family="'Arial Black', Impact, sans-serif" font-size="26" font-weight="900" letter-spacing="3" fill="none" stroke="#e8ff47" stroke-width="1.5">COPLA</text>
+          <circle cx="112" cy="28" r="2.5" fill="#ff6b35"/>
+        </svg>
+        <p class="footer-tagline">Registrá, reseñá y coleccioná los recitales a los que fuiste. Setlists reales, memoria real.</p>
+        <div class="footer-social">
+          <a class="footer-link-instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a class="footer-link-x" href="#" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.7L4.4 22H1.3l8.2-9.3L1 2h7.1l4.9 6.1L18.9 2zm-1.2 18h1.9L7.4 4H5.4l12.3 16z"/></svg>
+          </a>
+          <a class="footer-link-tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 2c.3 2 1.7 3.6 3.7 4v3c-1.4 0-2.7-.4-3.7-1.1v6.4a5.7 5.7 0 1 1-5.7-5.7c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 1 0 1.8 2.5V2h3z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li onclick="showSearch()">Explorar</li>
+          <li onclick="requireAuth(showColeccion)">Mi Colección</li>
+          <li onclick="requireAuth(showAmigos)">Amigos</li>
+          <li onclick="requireAuth(showEstadisticas)">Estadísticas</li>
+        </ul>
+      </div>
+      <div class="footer-contact">
+        <div class="footer-col-title">Contacto</div>
+        <a href="mailto:hola@coplar.com.ar">hola@coplar.com.ar</a>
+      </div>
+    </footer>
+    <div class="footer-bottom">
+      <span>© <span class="footer-year"></span> COPLA. Hecho con ♥ en Argentina.</span>
+      <span>Datos de setlists por Setlist.fm</span>
+    </div>
 </div>
 
 <!-- LOG MODAL -->
@@ -1807,6 +2028,27 @@
     "https://jxzwartzffgwqwzyzbvf.supabase.co",
     "sb_publishable_stiTW8GqwAslyz4EKBy_ow_jJm156gF"
   );
+
+  // ── Redes sociales de COPLA ──────────────────────────────────────
+  // Cuando crees las cuentas, completá acá el usuario (sin @) o dejá "" para ocultar el ícono.
+  const SOCIAL_LINKS = {
+    instagram: "",   // ej: "coplamusic"      → https://instagram.com/coplamusic
+    x:         "",   // ej: "coplamusic"      → https://x.com/coplamusic
+    tiktok:    "",   // ej: "coplamusic"      → https://tiktok.com/@coplamusic
+  };
+  function applySocialLinks(){
+    const map = {
+      "footer-link-instagram": SOCIAL_LINKS.instagram ? "https://instagram.com/" + SOCIAL_LINKS.instagram : null,
+      "footer-link-x":         SOCIAL_LINKS.x ? "https://x.com/" + SOCIAL_LINKS.x : null,
+      "footer-link-tiktok":    SOCIAL_LINKS.tiktok ? "https://tiktok.com/@" + SOCIAL_LINKS.tiktok : null,
+    };
+    Object.entries(map).forEach(([cls, url]) => {
+      document.querySelectorAll("." + cls).forEach(el => {
+        if(url){ el.href = url; el.style.display = ""; }
+        else { el.style.display = "none"; } // se oculta el ícono si todavía no hay cuenta
+      });
+    });
+  }
 
   let session = JSON.parse(localStorage.getItem("setlog_session") || "null");
 
@@ -2125,6 +2367,20 @@
     if(metaRvPill) metaRvPill.style.display="none";
     document.querySelector(".hero-img-fake").style.background="linear-gradient(135deg, "+color.split(",")[0]+"22, "+color.split(",")[1]+"18, rgba(20,20,30,0.9))";
     document.getElementById("logModalSub").textContent=artist+" · "+venue+" · "+date;
+    // Venue real (sidebar) — sin datos inventados; si algo no viene de Setlist.fm, no se muestra
+    const venueNameEl = document.getElementById("venueName");
+    const venueAddressEl = document.getElementById("venueAddress");
+    const venueMapEl = document.getElementById("venueMapLink");
+    if(venueNameEl) venueNameEl.textContent = venue;
+    if(venueAddressEl){
+      const state = setlist.venue?.city?.state;
+      const addressParts = [city, state].filter(Boolean);
+      venueAddressEl.innerHTML = addressParts.length ? addressParts.join("<br>") : "Ubicación no disponible";
+    }
+    if(venueMapEl){
+      const mapQuery = encodeURIComponent([venue, city].filter(Boolean).join(", "));
+      venueMapEl.href = "https://www.google.com/maps/search/?api=1&query=" + mapQuery;
+    }
     renderSetlist(setlist);
     // Cargar reseñas reales y actualizar stats
     loadReviews(setlist.id).then(async () => {
@@ -2519,6 +2775,8 @@
 
   renderNav();
   checkGoogleSession();
+  document.querySelectorAll(".footer-year").forEach(el => el.textContent = new Date().getFullYear());
+  applySocialLinks();
 
   // ── Detección de link de recuperación de contraseña ──────────────
   let recoveryToken = null;
