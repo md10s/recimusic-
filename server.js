@@ -92,6 +92,66 @@ app.post('/api/auth/logout', async (req, res) => {
   res.json({ ok: true });
 });
 
+// POST /api/auth/reset  { email }  — envía el mail de recuperación de contraseña
+app.post('/api/auth/reset', async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email requerido.' });
+
+  // Se arma dinámicamente según el dominio desde el que llegó el pedido
+  // (así funciona tanto en Render como en un dominio propio, sin hardcodear nada).
+  const redirectTo = `${req.protocol}://${req.get('host')}`;
+
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}`,
+      {
+        method: 'POST',
+        headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      }
+    );
+    if (!response.ok) {
+      const text = await response.text();
+      console.error('[Reset error]', response.status, text);
+      return res.status(400).json({ error: 'No se pudo enviar el email de recuperación.' });
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[Reset error]', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
+// POST /api/auth/update-password  { password }  (Header: Authorization Bearer <token de recovery>)
+app.post('/api/auth/update-password', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  const { password } = req.body;
+  if (!token) return res.status(401).json({ error: 'Token de recuperación faltante o vencido.' });
+  if (!password || password.length < 6)
+    return res.status(400).json({ error: 'La contraseña debe tener al menos 6 caracteres.' });
+
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: 'PUT',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('[Update password error]', data);
+      return res.status(400).json({ error: data.msg || 'No se pudo actualizar la contraseña.' });
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[Update password error]', err.message);
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+});
+
 // ════════════════════════════════════════════════════════════════
 //  REVIEWS
 // ════════════════════════════════════════════════════════════════
@@ -411,6 +471,6 @@ app.listen(PORT, () => {
   console.log('');
   console.log(`  🎸 Servidor corriendo en → http://localhost:${PORT}`);
   console.log(`  📡 API proxy activo       → /api/search?q=ARTISTA`);
-  console.log(`  🔐 Auth activo            → /api/auth/register | /api/auth/login`);
+  console.log(`  🔐 Auth activo            → /api/auth/register | /api/auth/login | /api/auth/reset`);
   console.log('');
 });
