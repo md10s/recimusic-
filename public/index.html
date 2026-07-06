@@ -114,6 +114,13 @@
     overflow-x: hidden;
   }
 
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 12px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 20px; border: 3px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+  * { scrollbar-width: thin; scrollbar-color: var(--surface3) var(--bg); }
+
   /* ── NAV ── */
   nav {
     position: fixed;
