@@ -1338,6 +1338,7 @@
     #coleccionScreen > div { padding: 32px 16px; }
   }
 </style>
+<script>function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"cab7791c187aad1e328c7ce1ae4aa2bf"})});</script>
 </head>
 <body>
 
@@ -1418,9 +1419,9 @@
         <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1zm3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10h14V4h-3.5zM2 5h12v8H2V5z"/></svg>
         Loggear este show
       </button>
-      <button class="btn-secondary">
-        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
-        Guardar
+      <button class="btn-secondary" id="favoriteBtn" onclick="toggleFavorite()">
+        <svg id="favoriteIcon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1c2.21 0 4 1.755 4 3.92C8 2.755 9.79 1 12 1s4 1.755 4 3.92c0 3.263-3.234 4.414-7.608 9.608a.513.513 0 0 1-.784 0C3.234 9.334 0 8.183 0 4.92 0 2.755 1.79 1 4 1z"/></svg>
+        <span id="favoriteLabel">Guardar</span>
       </button>
     </div>
   </div>
@@ -1838,6 +1839,10 @@
     <div style="font-family:'Bebas Neue',sans-serif; font-size:52px; letter-spacing:2px; margin-bottom:4px;" id="colUsername">—</div>
     <div style="font-size:13px; color:var(--text-muted); margin-bottom:40px;" id="colStats">0 shows loggeados</div>
     <div style="font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--text-muted); margin-bottom:20px; display:flex; align-items:center; gap:12px;">Mis shows <span style="flex:1; height:1px; background:var(--border); display:block;"></span></div>
+    <div style="display:flex; gap:8px; margin-bottom:20px;">
+      <button id="colTabAll" class="btn-secondary" style="padding:8px 18px; font-size:13px;" onclick="renderColGrid(false)">Todos</button>
+      <button id="colTabFav" class="btn-secondary" style="padding:8px 18px; font-size:13px;" onclick="renderColGrid(true)">♥ Favoritos</button>
+    </div>
     <div id="colGrid" style="display:flex; flex-direction:column; gap:10px;">
       <div style="text-align:center; padding:48px; color:var(--text-muted); font-size:14px;">Cargando tus shows…</div>
     </div>
@@ -2222,6 +2227,7 @@
   }
   function requireAuth(cb){if(session)cb();else openAuthModal("login");}
 
+  let allMyReviews = [];
   async function showColeccion(){
     document.getElementById("searchScreen").classList.remove("active");
     document.querySelector(".hero").style.display="none";
@@ -2230,14 +2236,30 @@
     document.getElementById("coleccionScreen").style.display="block";
     document.getElementById("colUsername").textContent=session.username;
     const res=await fetch("/api/reviews/me",{headers:{"Authorization":"Bearer "+session.token}});
-    const reviews=await res.json();
-    document.getElementById("colStats").textContent=reviews.length+" show"+(reviews.length!==1?"s":"")+" loggeado"+(reviews.length!==1?"s":"");
+    allMyReviews=await res.json();
+    document.getElementById("colStats").textContent=allMyReviews.length+" show"+(allMyReviews.length!==1?"s":"")+" loggeado"+(allMyReviews.length!==1?"s":"");
+    renderColGrid(false);
+  }
+
+  function renderColGrid(onlyFavorites){
+    const tabAll=document.getElementById("colTabAll"), tabFav=document.getElementById("colTabFav");
+    if(tabAll&&tabFav){
+      tabAll.style.background=onlyFavorites?"":"var(--surface3)";
+      tabFav.style.background=onlyFavorites?"var(--surface3)":"";
+    }
+    const reviews=onlyFavorites?allMyReviews.filter(r=>r.is_favorite):allMyReviews;
     const grid=document.getElementById("colGrid");
-    if(!reviews.length){grid.innerHTML="<div style='text-align:center;padding:48px;color:var(--text-muted);font-size:14px;'>Todavia no loggeaste ningun show.<br><br><button onclick=showSearch() class=btn-primary style=margin-top:16px>Explorar shows</button></div>";return;}
+    if(!reviews.length){
+      grid.innerHTML=onlyFavorites
+        ?"<div style='text-align:center;padding:48px;color:var(--text-muted);font-size:14px;'>Todavía no marcaste ningún show como favorito.<br><span style='font-size:12px;'>Tocá el corazón en el detalle de un show que hayas loggeado.</span></div>"
+        :"<div style='text-align:center;padding:48px;color:var(--text-muted);font-size:14px;'>Todavia no loggeaste ningun show.<br><br><button onclick=showSearch() class=btn-primary style=margin-top:16px>Explorar shows</button></div>";
+      return;
+    }
     grid.innerHTML=reviews.map(r=>{
       const c=r.concerts; const color=colorFor(c.artist_name);
       const stars="★".repeat(r.rating||0)+"☆".repeat(5-(r.rating||0));
-      return "<div class=concert-result-card><div class=card-thumb style='background:linear-gradient(135deg,"+color+");'>" +initials(c.artist_name)+"</div><div class=card-main><div class=card-artist>"+c.artist_name+"</div><div class=card-title>"+c.venue_name+(c.tour_name?" · "+c.tour_name:"")+"</div><div class=card-meta><div class=card-meta-item>📍 "+( c.city||"—")+"</div><div class=card-meta-item>📅 "+(c.event_date||"—")+"</div><div class=card-meta-item>🎵 "+(c.song_count||"—")+" canciones</div></div></div><div class=card-right><div style='color:var(--star-active);font-size:16px;'>"+stars+"</div></div></div>";
+      const favMark=r.is_favorite?"<span style='color:var(--accent2);margin-right:6px;' title='Favorito'>♥</span>":"";
+      return "<div class=concert-result-card><div class=card-thumb style='background:linear-gradient(135deg,"+color+");'>" +initials(c.artist_name)+"</div><div class=card-main><div class=card-artist>"+favMark+c.artist_name+"</div><div class=card-title>"+c.venue_name+(c.tour_name?" · "+c.tour_name:"")+"</div><div class=card-meta><div class=card-meta-item>📍 "+( c.city||"—")+"</div><div class=card-meta-item>📅 "+(c.event_date||"—")+"</div><div class=card-meta-item>🎵 "+(c.song_count||"—")+" canciones</div></div></div><div class=card-right><div style='color:var(--star-active);font-size:16px;'>"+stars+"</div></div></div>";
     }).join("");
   }
 
@@ -2270,6 +2292,11 @@
     try {
       const res = await fetch("/api/reviews/concert/" + encodeURIComponent(setlistfm_id));
       const reviews = await res.json();
+      if(session?.user?.id){
+        const ownReview=reviews.find(r=>r.user_id===session.user.id);
+        currentIsFavorite=!!ownReview?.is_favorite;
+        updateFavoriteButton();
+      }
       label.textContent = "Reseñas" + (reviews.length ? " · " + reviews.length + " en total" : "");
       if (!reviews.length) {
         list.innerHTML = "<div style='padding:32px 0;text-align:center;color:var(--text-muted);font-size:14px;'>Todavía no hay reseñas.<br><span style='font-size:12px;'>¡Sé el primero en loggear este show!</span></div>";
@@ -2390,6 +2417,8 @@
     document.getElementById("nav-explorar").style.color="";
     if(!setlist){document.querySelector(".hero").style.display="";document.querySelector(".main").style.display="";return;}
     currentSetlist=setlist;
+    currentIsFavorite=false;
+    updateFavoriteButton();
     const artist=setlist.artist?.name||"—";
     const venue=setlist.venue?.name||"—";
     const city=[setlist.venue?.city?.name,setlist.venue?.city?.country?.name].filter(Boolean).join(", ");
@@ -2487,6 +2516,38 @@
     document.getElementById("logModal").style.display="flex";
   }
   function closeModal(){document.getElementById("logModal").style.display="none";}
+
+  let currentIsFavorite = false;
+
+  function updateFavoriteButton(){
+    const icon=document.getElementById("favoriteIcon");
+    const label=document.getElementById("favoriteLabel");
+    if(icon) icon.style.color = currentIsFavorite ? "var(--accent2)" : "";
+    if(label) label.textContent = currentIsFavorite ? "Guardado" : "Guardar";
+  }
+
+  async function toggleFavorite(){
+    if(!session){pendingLog=true;openAuthModal("login");return;}
+    if(!currentSetlist) return;
+    const s=currentSetlist;
+    const btn=document.getElementById("favoriteBtn");
+    if(btn) btn.disabled=true;
+    try{
+      const res=await fetch("/api/reviews/favorite",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.token},
+        body:JSON.stringify({ setlistfm_id:s.id })
+      });
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||"Error al guardar favorito.");
+      currentIsFavorite=data.is_favorite;
+      updateFavoriteButton();
+    }catch(err){
+      alert(err.message||"No se pudo actualizar. Verificá que ya hayas loggeado este show.");
+    }finally{
+      if(btn) btn.disabled=false;
+    }
+  }
 
   async function saveLog(){
     if(!session||!currentSetlist)return;

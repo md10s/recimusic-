@@ -231,6 +231,64 @@ app.post('/api/reviews', async (req, res) => {
   res.json({ ok: true, review: Array.isArray(reviewData) ? reviewData[0] : reviewData });
 });
 
+// POST /api/reviews/favorite  { setlistfm_id }  — togglea favorito sobre un show YA loggeado
+app.post('/api/reviews/favorite', async (req, res) => {
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'No autenticado.' });
+
+  const { setlistfm_id } = req.body;
+  if (!setlistfm_id) return res.status(400).json({ error: 'Falta el show.' });
+
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` },
+  });
+  const user = await userRes.json();
+  if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
+
+  // Buscar el concert
+  const concertRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/concerts?setlistfm_id=eq.${encodeURIComponent(setlistfm_id)}&select=id`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+  );
+  const concertData = await concertRes.json();
+  const concert = Array.isArray(concertData) && concertData[0];
+  if (!concert?.id) return res.status(400).json({ error: 'Primero tenés que loggear este show.' });
+
+  // Buscar la reseña propia de este show
+  const existingRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/reviews?concert_id=eq.${concert.id}&user_id=eq.${user.id}&select=id,rating,body,is_favorite`,
+    { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${token}` } }
+  );
+  const existingData = await existingRes.json();
+  const existing = Array.isArray(existingData) && existingData[0];
+  if (!existing) return res.status(400).json({ error: 'Primero tenés que loggear este show.' });
+
+  const newFavorite = !existing.is_favorite;
+
+  const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=representation',
+    },
+    body: JSON.stringify({
+      concert_id: concert.id,
+      user_id: user.id,
+      rating: existing.rating,
+      body: existing.body,
+      is_favorite: newFavorite,
+    }),
+  });
+  const upsertData = await upsertRes.json();
+  if (!upsertRes.ok) {
+    console.error('[Favorite error]', upsertData);
+    return res.status(500).json({ error: 'Error al actualizar favorito.', detail: upsertData });
+  }
+  res.json({ ok: true, is_favorite: newFavorite });
+});
+
 // GET /api/reviews/concert/:setlistfm_id  — reseñas públicas de un show
 app.get('/api/reviews/concert/:setlistfm_id', async (req, res) => {
   const { setlistfm_id } = req.params;
