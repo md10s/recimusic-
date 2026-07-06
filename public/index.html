@@ -1388,6 +1388,7 @@
     <div class="hero-img-fake">
       <div class="artist-silhouette"></div>
     </div>
+    <img id="artistPhoto" class="hero-img" style="display:none; position:absolute; inset:0;" alt="" onerror="this.style.display='none';">
   </div>
   <div class="hero-vignette"></div>
   <div class="hero-vignette-bottom"></div>
@@ -2411,6 +2412,28 @@
     loadPopular();
   }
 
+  async function fetchWikiImage(lang, artistName){
+    try{
+      const res=await fetch("https://"+lang+".wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(artistName));
+      if(!res.ok) return null;
+      const data=await res.json();
+      return data.originalimage?.source||data.thumbnail?.source||null;
+    }catch(e){ return null; }
+  }
+
+  let photoRequestId=0;
+  async function loadArtistPhoto(artistName){
+    const img=document.getElementById("artistPhoto");
+    const myRequestId=++photoRequestId; // evita que una respuesta vieja pise la foto del show actual
+    img.style.display="none";
+    img.removeAttribute("src");
+    if(!artistName||artistName==="—") return;
+    let url=await fetchWikiImage("es",artistName);
+    if(!url) url=await fetchWikiImage("en",artistName);
+    if(myRequestId!==photoRequestId) return; // el usuario ya cambió de show mientras esperábamos
+    if(url){ img.src=url; img.style.display="block"; }
+  }
+
   function showDetail(setlist){
     document.getElementById("searchScreen").classList.remove("active");
     document.getElementById("coleccionScreen").style.display="none";
@@ -2420,6 +2443,7 @@
     currentIsFavorite=false;
     updateFavoriteButton();
     const artist=setlist.artist?.name||"—";
+    loadArtistPhoto(artist);
     const venue=setlist.venue?.name||"—";
     const city=[setlist.venue?.city?.name,setlist.venue?.city?.country?.name].filter(Boolean).join(", ");
     const date=formatDate(setlist.eventDate);
