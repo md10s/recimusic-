@@ -2421,8 +2421,19 @@
     }catch(e){ return null; }
   }
 
+  function inferOriginalArtist(setlist){
+    const counts={};
+    (setlist.sets?.set||[]).forEach(set=>(set.song||[]).forEach(song=>{
+      const name=song.cover?.name;
+      if(name) counts[name]=(counts[name]||0)+1;
+    }));
+    let best=null,max=0;
+    for(const name in counts){ if(counts[name]>max){max=counts[name];best=name;} }
+    return best;
+  }
+
   let photoRequestId=0;
-  async function loadArtistPhoto(artistName){
+  async function loadArtistPhoto(artistName, fallbackName){
     const img=document.getElementById("artistPhoto");
     const myRequestId=++photoRequestId; // evita que una respuesta vieja pise la foto del show actual
     img.style.display="none";
@@ -2430,6 +2441,10 @@
     if(!artistName||artistName==="—") return;
     let url=await fetchWikiImage("es",artistName);
     if(!url) url=await fetchWikiImage("en",artistName);
+    if(!url&&fallbackName){
+      url=await fetchWikiImage("es",fallbackName);
+      if(!url) url=await fetchWikiImage("en",fallbackName);
+    }
     if(myRequestId!==photoRequestId) return; // el usuario ya cambió de show mientras esperábamos
     if(url){ img.src=url; img.style.display="block"; }
   }
@@ -2443,7 +2458,7 @@
     currentIsFavorite=false;
     updateFavoriteButton();
     const artist=setlist.artist?.name||"—";
-    loadArtistPhoto(artist);
+    loadArtistPhoto(artist, inferOriginalArtist(setlist));
     const venue=setlist.venue?.name||"—";
     const city=[setlist.venue?.city?.name,setlist.venue?.city?.country?.name].filter(Boolean).join(", ");
     const date=formatDate(setlist.eventDate);
