@@ -735,6 +735,39 @@
     position: relative;
     margin-bottom: 12px;
   }
+  .trending-suggestions {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 20;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+  }
+  .trending-suggestions.visible { display: block; }
+  .trending-suggestion-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: background .12s;
+  }
+  .trending-suggestion-item:hover { background: var(--surface3); }
+  .trending-suggestion-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #000; flex-shrink: 0;
+  }
+  .trending-suggestion-label { font-size: 14px; color: var(--text); }
+  .trending-suggestion-tag {
+    margin-left: auto; font-size: 10px; letter-spacing: .5px; text-transform: uppercase;
+    color: var(--text-dim);
+  }
   .search-icon {
     position: absolute;
     left: 20px;
@@ -1628,8 +1661,11 @@
         placeholder="Artista, banda, tour… ej: Radiohead, Soda Stereo, Blur"
         autocomplete="off"
         oninput="handleSearch(this.value)"
+        onfocus="updateTrendingSuggestions(this.value)"
+        onblur="setTimeout(()=>document.getElementById('trendingSuggestions').classList.remove('visible'),150)"
       />
       <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+      <div class="trending-suggestions" id="trendingSuggestions"></div>
     </div>
 
   </div>
@@ -2468,7 +2504,34 @@
   }
 
   let searchTimer=null,lastQuery="",totalItems=0;
-  function handleSearch(val){document.getElementById("searchClear").classList.toggle("visible",val.length>0);clearTimeout(searchTimer);if(!val.trim()){showInitial();return;}setLoadingState();searchTimer=setTimeout(()=>runSearch(val.trim(),1),600);}
+  const TRENDING_ARTISTS = [
+    {name:"Radiohead", initials:"RH", gradient:"#60a5fa,#1d4ed8"},
+    {name:"Soda Stereo", initials:"SS", gradient:"#f472b6,#9333ea"},
+    {name:"Blur", initials:"BL", gradient:"#34d399,#059669"},
+    {name:"Charly García", initials:"CG", gradient:"#fbbf24,#d97706"},
+    {name:"The Strokes", initials:"TS", gradient:"#f87171,#dc2626"},
+    {name:"Daft Punk", initials:"DP", gradient:"#e8ff47,#b5cc1a"},
+    {name:"Gustavo Cerati", initials:"GC", gradient:"#c084fc,#7c3aed"},
+    {name:"Arctic Monkeys", initials:"AM", gradient:"#94a3b8,#475569"},
+  ];
+
+  function updateTrendingSuggestions(val){
+    const box=document.getElementById("trendingSuggestions");
+    const q=val.trim().toLowerCase();
+    if(!q){box.classList.remove("visible");box.innerHTML="";return;}
+    const matches=TRENDING_ARTISTS.filter(a=>a.name.toLowerCase().includes(q));
+    if(!matches.length){box.classList.remove("visible");box.innerHTML="";return;}
+    box.innerHTML=matches.map(a=>
+      "<div class='trending-suggestion-item' onclick=\"searchFor('"+a.name.replace(/'/g,"\\'")+"')\">"+
+        "<div class='trending-suggestion-avatar' style='background:linear-gradient(135deg,"+a.gradient+");'>"+a.initials+"</div>"+
+        "<div class='trending-suggestion-label'>"+a.name+"</div>"+
+        "<div class='trending-suggestion-tag'>Tendencia</div>"+
+      "</div>"
+    ).join("");
+    box.classList.add("visible");
+  }
+
+  function handleSearch(val){document.getElementById("searchClear").classList.toggle("visible",val.length>0);updateTrendingSuggestions(val);clearTimeout(searchTimer);if(!val.trim()){showInitial();return;}setLoadingState();searchTimer=setTimeout(()=>runSearch(val.trim(),1),600);}
   async function runSearch(q,page){lastQuery=q;try{const res=await fetch("/api/search?q="+encodeURIComponent(q)+"&p="+page);if(!res.ok){const e=await res.json();throw new Error(e.error||"Error "+res.status);}const data=await res.json();totalItems=data.total||0;renderResults(data.setlist||[],q,totalItems,page);}catch(err){showError(err.message);}}
 
   function renderResults(setlists,q,total,page){
@@ -2503,8 +2566,8 @@
   function colorFor(n){let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))&0xffff;return COLORS[h%COLORS.length];}
   function formatDate(d){if(!d)return"—";const[day,month,year]=d.split("-");return parseInt(day)+" "+["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][parseInt(month)-1]+" "+year;}
   function countSongs(s){if(!s?.sets?.set)return 0;return s.sets.set.reduce((a,s)=>a+(s.song?.length||0),0);}
-  function searchFor(a){const f=document.getElementById("searchField");f.value=a;handleSearch(a);f.focus();}
-  function clearSearch(){document.getElementById("searchField").value="";document.getElementById("searchClear").classList.remove("visible");showInitial();}
+  function searchFor(a){const f=document.getElementById("searchField");f.value=a;document.getElementById("trendingSuggestions").classList.remove("visible");handleSearch(a);f.focus();}
+  function clearSearch(){document.getElementById("searchField").value="";document.getElementById("searchClear").classList.remove("visible");document.getElementById("trendingSuggestions").classList.remove("visible");showInitial();}
   function setLoadingState(){document.getElementById("searchInitial").style.display="none";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.add("visible");}
   function showInitial(){document.getElementById("searchInitial").style.display="";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.remove("visible");}
   function showError(msg){document.getElementById("searchLoading").classList.remove("visible");document.querySelector("#searchEmpty .empty-icon").textContent="⚠️";document.getElementById("emptyTitle").textContent=msg;document.querySelector("#searchEmpty .empty-sub").textContent="Verifica que el servidor este corriendo.";document.getElementById("searchEmpty").classList.add("visible");}

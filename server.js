@@ -415,8 +415,8 @@ app.get('/api/users/:username/common', async (req, res) => {
 
 app.get('/api/search', async (req, res) => {
   const { q, p = 1 } = req.query;
-  if (!q || q.trim().length < 2)
-    return res.status(400).json({ error: 'El parámetro "q" es requerido (mínimo 2 caracteres).' });
+  if (!q || q.trim().length < 1)
+    return res.status(400).json({ error: 'El parámetro "q" es requerido.' });
 
   const apiKey = process.env.SETLISTFM_KEY;
   if (!apiKey) return res.status(500).json({ error: 'Falta SETLISTFM_KEY en el archivo .env' });
