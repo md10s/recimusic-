@@ -207,7 +207,7 @@ app.post('/api/reviews', async (req, res) => {
   if (!concert?.id) return res.status(500).json({ error: 'No se pudo obtener el ID del show.' });
 
   // Upsert review con token del usuario
-  const reviewRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
+  const reviewRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews?on_conflict=concert_id,user_id`, {
     method: 'POST',
     headers: {
       'apikey': SUPABASE_KEY,
@@ -265,7 +265,7 @@ app.post('/api/reviews/favorite', async (req, res) => {
 
   const newFavorite = !existing.is_favorite;
 
-  const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews`, {
+  const upsertRes = await fetch(`${SUPABASE_URL}/rest/v1/reviews?on_conflict=concert_id,user_id`, {
     method: 'POST',
     headers: {
       'apikey': SUPABASE_KEY,
