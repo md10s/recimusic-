@@ -468,6 +468,82 @@ app.get('/api/users/:username/common', async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════════════
+//  SPOTIFY (Client Credentials Flow — sin login de usuario)
+// ════════════════════════════════════════════════════════════════
+
+let spotifyToken = null;
+let spotifyTokenExpiry = 0;
+
+async function getSpotifyToken() {
+  if (spotifyToken && Date.now() < spotifyTokenExpiry) return spotifyToken;
+
+  const clientId = process.env.SPOTIFY_CLIENT_ID;
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new Error('Faltan SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET en las variables de entorno.');
+  }
+
+  const basic = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  const res = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${basic}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: 'grant_type=client_credentials',
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error_description || 'Error al autenticar con Spotify.');
+
+  spotifyToken = data.access_token;
+  spotifyTokenExpiry = Date.now() + (data.expires_in - 60) * 1000; // renovamos 1 min antes de que expire
+  return spotifyToken;
+}
+
+// GET /api/spotify/artist?name=...  — mejor foto de artista disponible
+app.get('/api/spotify/artist', async (req, res) => {
+  const { name } = req.query;
+  if (!name) return res.status(400).json({ error: 'Falta el nombre del artista.' });
+  try {
+    const token = await getSpotifyToken();
+    const searchRes = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist&limit=1`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await searchRes.json();
+    const artist = data.artists?.items?.[0];
+    if (!artist) return res.json({ image: null });
+    res.json({
+      image: artist.images?.[0]?.url || null,
+      spotify_url: artist.external_urls?.spotify || null,
+      name: artist.name,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/spotify/track?artist=...&song=...  — id del track exacto para embeber
+app.get('/api/spotify/track', async (req, res) => {
+  const { artist, song } = req.query;
+  if (!song) return res.status(400).json({ error: 'Falta el nombre de la canción.' });
+  try {
+    const token = await getSpotifyToken();
+    const q = `track:${song}` + (artist ? ` artist:${artist}` : '');
+    const searchRes = await fetch(
+      `https://api.spotify.com/v1/search?q=${encodeURIComponent(q)}&type=track&limit=1`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const data = await searchRes.json();
+    const track = data.tracks?.items?.[0];
+    if (!track) return res.json({ id: null });
+    res.json({ id: track.id, name: track.name, spotify_url: track.external_urls?.spotify });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════
 //  SETLIST.FM PROXY
 // ════════════════════════════════════════════════════════════════
 
@@ -529,6 +605,7 @@ app.listen(PORT, () => {
   console.log('');
   console.log(`  🎸 Servidor corriendo en → http://localhost:${PORT}`);
   console.log(`  📡 API proxy activo       → /api/search?q=ARTISTA`);
+  console.log(`  🎧 Spotify activo         → /api/spotify/artist | /api/spotify/track`);
   console.log(`  🔐 Auth activo            → /api/auth/register | /api/auth/login | /api/auth/reset`);
   console.log('');
 });
