@@ -2437,7 +2437,16 @@
     container.innerHTML=html;
   }
 
-  function openLogModal(){if(!session){pendingLog=true;openAuthModal("login");return;}modalRating=0;document.querySelectorAll("#modalStars .star-btn").forEach(s=>s.style.color="");document.getElementById("logModal").style.display="flex";}
+  function openLogModal(){
+    if(!session){pendingLog=true;openAuthModal("login");return;}
+    modalRating=0;
+    document.querySelectorAll("#modalStars .star-btn").forEach(s=>s.style.color="");
+    const btn=document.querySelector("#logModal .btn-primary");
+    if(btn){btn.textContent="Guardar en mi coleccion";btn.disabled=false;}
+    const textarea=document.querySelector("#logModal textarea");
+    if(textarea) textarea.value="";
+    document.getElementById("logModal").style.display="flex";
+  }
   function closeModal(){document.getElementById("logModal").style.display="none";}
 
   async function saveLog(){
