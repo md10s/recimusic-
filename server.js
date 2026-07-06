@@ -6,11 +6,26 @@ require('dotenv').config();
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// Red de seguridad: si algo revienta sin ser controlado, lo logueamos
+// pero NO tiramos abajo todo el servidor (así un bug en un endpoint
+// no te deja el sitio entero caído con 502 hasta el próximo restart).
+process.on('unhandledRejection', (err) => {
+  console.error('[unhandledRejection]', err);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[uncaughtException]', err);
+});
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
+
+// ── Helper: nunca .map() sobre algo que no sea un array de verdad ──
+// (si Supabase devuelve un objeto de error en vez de una lista, esto evita
+// que el servidor entero se caiga con un TypeError sin controlar)
+const asArray = (x) => Array.isArray(x) ? x : [];
 
 // ── Helper: Supabase REST ───────────────────────────────────────
 async function sbFetch(path, options = {}) {
@@ -304,7 +319,7 @@ app.get('/api/reviews/concert/:setlistfm_id', async (req, res) => {
   const result = await sbFetch(
     `/reviews?concert_id=eq.${concertId}&select=*,profiles(username)&order=created_at.desc&limit=20`
   );
-  res.json(result.data || []);
+  res.json(asArray(result.data));
 });
 
 // GET /api/popular — concerts con más reseñas
@@ -317,7 +332,7 @@ app.get('/api/popular', async (req, res) => {
     if (!result.ok) return res.status(500).json({ error: 'Error al obtener populares.' });
 
     // Filtrar los que tengan al menos 1 reseña y ordenar por cantidad
-    const concerts = (result.data || [])
+    const concerts = asArray(result.data)
       .filter(c => c.reviews?.[0]?.count > 0)
       .sort((a, b) => (b.reviews?.[0]?.count || 0) - (a.reviews?.[0]?.count || 0))
       .slice(0, 6)
@@ -325,7 +340,7 @@ app.get('/api/popular', async (req, res) => {
 
     // Si no hay suficientes con reseñas, completar con recientes
     if (concerts.length < 4) {
-      const recent = (result.data || [])
+      const recent = asArray(result.data)
         .filter(c => !concerts.find(x => x.id === c.id))
         .slice(0, 6 - concerts.length)
         .map(c => ({ ...c, review_count: 0 }));
@@ -353,7 +368,7 @@ app.get('/api/reviews/me', async (req, res) => {
     `/reviews?user_id=eq.${user.id}&select=*,concerts(*)&order=created_at.desc`,
     { token }
   );
-  res.json(result.data || []);
+  res.json(asArray(result.data));
 });
 
 
@@ -408,8 +423,8 @@ app.get('/api/follows/me', async (req, res) => {
     sbFetch(`/follows?following_id=eq.${user.id}&select=follower_id,profiles!follows_follower_id_fkey(username)`),
   ]);
   res.json({
-    following: (following.data || []).map(f => ({ id: f.following_id, username: f.profiles?.username })),
-    followers: (followers.data || []).map(f => ({ id: f.follower_id, username: f.profiles?.username })),
+    following: asArray(following.data).map(f => ({ id: f.following_id, username: f.profiles?.username })),
+    followers: asArray(followers.data).map(f => ({ id: f.follower_id, username: f.profiles?.username })),
   });
 });
 
@@ -419,13 +434,13 @@ app.get('/api/follows/feed', async (req, res) => {
   const user = await getUserFromToken(token);
   if (!user.id) return res.status(401).json({ error: 'Token inválido.' });
   const followingRes = await sbFetch(`/follows?follower_id=eq.${user.id}&select=following_id`);
-  const ids = (followingRes.data || []).map(f => f.following_id);
+  const ids = asArray(followingRes.data).map(f => f.following_id);
   if (!ids.length) return res.json([]);
   const inClause = `(${ids.map(id => `"${id}"`).join(',')})`;
   const feed = await sbFetch(
     `/reviews?user_id=in.${inClause}&select=*,profiles(username),concerts(artist_name,venue_name,city,event_date,tour_name,setlistfm_id)&order=created_at.desc&limit=30`
   );
-  res.json(feed.data || []);
+  res.json(asArray(feed.data));
 });
 
 app.get('/api/users/search', async (req, res) => {
@@ -435,10 +450,10 @@ app.get('/api/users/search', async (req, res) => {
   let myId = null;
   if (token) { const u = await getUserFromToken(token); myId = u.id || null; }
   const result = await sbFetch(`/profiles?username=ilike.*${encodeURIComponent(q.trim())}*&select=id,username&limit=10`);
-  const users = (result.data || []).filter(u => u.id !== myId);
+  const users = asArray(result.data).filter(u => u.id !== myId);
   if (myId && users.length) {
     const followingRes = await sbFetch(`/follows?follower_id=eq.${myId}&select=following_id`);
-    const followingIds = new Set((followingRes.data || []).map(f => f.following_id));
+    const followingIds = new Set(asArray(followingRes.data).map(f => f.following_id));
     users.forEach(u => u.is_following = followingIds.has(u.id));
   }
   res.json(users);
@@ -456,14 +471,14 @@ app.get('/api/users/:username/common', async (req, res) => {
     sbFetch(`/reviews?user_id=eq.${user.id}&select=concert_id,rating`),
     sbFetch(`/reviews?user_id=eq.${targetId}&select=concert_id,rating`),
   ]);
-  const myMap = new Map((myReviews.data || []).map(r => [r.concert_id, r.rating]));
-  const commonIds = (theirReviews.data || []).filter(r => myMap.has(r.concert_id)).map(r => r.concert_id);
+  const myMap = new Map(asArray(myReviews.data).map(r => [r.concert_id, r.rating]));
+  const commonIds = asArray(theirReviews.data).filter(r => myMap.has(r.concert_id)).map(r => r.concert_id);
   if (!commonIds.length) return res.json([]);
   const concerts = await sbFetch(`/concerts?id=in.(${commonIds.join(',')})&select=id,artist_name,venue_name,city,event_date,setlistfm_id`);
-  res.json((concerts.data || []).map(c => ({
+  res.json(asArray(concerts.data).map(c => ({
     ...c,
     my_rating: myMap.get(c.id),
-    their_rating: (theirReviews.data || []).find(r => r.concert_id === c.id)?.rating,
+    their_rating: asArray(theirReviews.data).find(r => r.concert_id === c.id)?.rating,
   })));
 });
 
