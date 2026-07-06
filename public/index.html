@@ -1714,7 +1714,7 @@
     <!-- EMPTY STATE -->
     <div class="search-empty" id="searchEmpty">
       <div class="empty-icon">🎸</div>
-      <div class="empty-title">Sin resultados para "<span id="emptyQuery"></span>"</div>
+      <div class="empty-title" id="emptyTitle"></div>
       <div class="empty-sub">Probá con el nombre del artista en inglés o verificá la ortografía.<br>Si el show existió, podés crearlo manualmente.</div>
     </div>
 
@@ -2474,7 +2474,7 @@
   function renderResults(setlists,q,total,page){
     document.getElementById("searchLoading").classList.remove("visible");
     const withSongs=setlists.filter(s=>countSongs(s)>0);
-    if(!withSongs.length&&page===1){document.getElementById("emptyQuery").textContent=q;document.getElementById("searchEmpty").classList.add("visible");return;}
+    if(!withSongs.length&&page===1){document.querySelector("#searchEmpty .empty-icon").textContent="🎸";document.getElementById("emptyTitle").textContent='Sin resultados para "'+q+'"';document.querySelector("#searchEmpty .empty-sub").innerHTML="Probá con el nombre del artista en inglés o verificá la ortografía.<br>Si el show existió, podés crearlo manualmente.";document.getElementById("searchEmpty").classList.add("visible");return;}
     document.getElementById("resultsCount").innerHTML="<strong>"+total.toLocaleString()+"</strong> shows en Setlist.fm para '<strong>"+q+"</strong>'";
     const grid=document.getElementById("concertGrid");
     if(page===1)grid.innerHTML="";
@@ -2507,7 +2507,7 @@
   function clearSearch(){document.getElementById("searchField").value="";document.getElementById("searchClear").classList.remove("visible");showInitial();}
   function setLoadingState(){document.getElementById("searchInitial").style.display="none";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.add("visible");}
   function showInitial(){document.getElementById("searchInitial").style.display="";document.getElementById("searchResults").style.display="none";document.getElementById("searchEmpty").classList.remove("visible");document.getElementById("searchLoading").classList.remove("visible");}
-  function showError(msg){document.getElementById("searchLoading").classList.remove("visible");document.querySelector("#searchEmpty .empty-icon").textContent="⚠️";document.querySelector("#searchEmpty .empty-title").textContent=msg;document.querySelector("#searchEmpty .empty-sub").textContent="Verifica que el servidor este corriendo.";document.getElementById("searchEmpty").classList.add("visible");}
+  function showError(msg){document.getElementById("searchLoading").classList.remove("visible");document.querySelector("#searchEmpty .empty-icon").textContent="⚠️";document.getElementById("emptyTitle").textContent=msg;document.querySelector("#searchEmpty .empty-sub").textContent="Verifica que el servidor este corriendo.";document.getElementById("searchEmpty").classList.add("visible");}
   function toggleFilter(el, query){
     document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
     el.classList.add("active");
